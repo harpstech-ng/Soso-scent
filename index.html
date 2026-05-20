@@ -10,7 +10,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <!-- PDF Generator -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- REMOVED firebase-storage - we use Cloudinary now -->
 
 <style>
 :root{
@@ -25,18 +24,18 @@ body{font-family:Georgia,serif;background:var(--beige);color:var(--black)}
 @keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-15px)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 @keyframes slideIn{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes floatBottle{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-15px) rotate(5deg)}}
+@keyframes floatBottle{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-12px) rotate(3deg)}}
 
-/* UPDATED HEADER WITH BUSY DESIGN */
-header{position:fixed;top:0;width:100%;height:80px;z-index:1000;overflow:hidden}
-.header-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(212,175,55,0.2)}
+/* FIXED HEADER */
+header{position:fixed;top:0;width:100%;height:80px;z-index:1000}
+.header-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(90deg, rgba(245,241,232,0.98), rgba(255,255,255,0.98));backdrop-filter:blur(8px);border-bottom:2px solid rgba(212,175,55,0.3)}
 .header-content{position:relative;display:flex;justify-content:space-between;align-items:center;padding:15px 20px;height:100%}
-.floating-bottles{position:absolute;width:100%;height:100%;overflow:hidden;opacity:0.12}
-.bottle{position:absolute;width:55px;height:55px;object-fit:contain;animation:floatBottle 15s infinite ease-in-out}
-.b1{left:8%;top:5px;animation-delay:0s}
-.b2{left:35%;top:-8px;animation-delay:4s}
-.b3{left:60%;top:10px;animation-delay:8s}
-.b4{left:85%;top:0px;animation-delay:12s}
+.floating-bottles{position:absolute;width:100%;height:100%;overflow:hidden;opacity:0.25;pointer-events:none}
+.bottle{position:absolute;width:50px;height:50px;object-fit:contain;animation:floatBottle 12s infinite ease-in-out;filter:brightness(1.1)}
+.b1{left:5%;top:15px;animation-delay:0s}
+.b2{left:30%;top:5px;animation-delay:3s}
+.b3{left:55%;top:20px;animation-delay:6s}
+.b4{left:80%;top:10px;animation-delay:9s}
 
 .logo{font-size:1.6rem;font-weight:700;color:var(--gold-dark);cursor:pointer}
 .nav-links{display:flex;gap:25px;list-style:none}
@@ -166,7 +165,6 @@ footer{background:var(--black);color:var(--white);padding:40px 20px;text-align:c
 </head>
 <body>
 
-<!-- UPDATED HEADER -->
 <header>
   <div class="header-bg">
     <div class="floating-bottles">
@@ -323,7 +321,6 @@ footer{background:var(--black);color:var(--white);padding:40px 20px;text-align:c
   <div class="modal-content">
     <div class="modal-header"><h2>Your Wishlist ❤️</h2><span class="close-btn" onclick="toggleWishlist()">&times;</span></div>
     <div id="wishlistItems"></div>
-    <!-- #19 ADDED: Share wishlist button -->
     <button class="btn" style="width:100%;margin-top:20px;background:var(--green)" onclick="shareWishlist()">📤 Share Wishlist on WhatsApp</button>
   </div>
 </div>
@@ -478,11 +475,10 @@ function startAbandonedCartTimer() {
       cart.forEach(i => msg += `➤ ${i.name} x${i.qty}%0A`);
       msg += `%0AComplete your order here: ${window.location.origin}`;
       window.open(`https://wa.me/${customerPhone}?text=${msg}`, '_blank');
-    }, 3600000); // 1 hour
+    }, 3600000);
   }
 }
 
-// ========== FIREBASE SYNC ==========
 async function loadCloudData(){
   const snap = await db.collection('sosoData').doc('main').get();
   if(snap.exists){
@@ -513,47 +509,38 @@ async function saveAll(){
   });
 }
 
-// ========== CLOUDINARY UPLOAD FUNCTIONS ==========
 async function handleImageUpload(e){
   var files = e.target.files;
   if(files.length + uploadedImages.length > 4){
     alert('Max 4 images per product!');
     return;
   }
-
   for(var i=0; i<files.length; i++){
     var file = files[i];
     var formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     formData.append('folder', 'soso-scent');
-
     try{
       var res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-        method: 'POST',
-        body: formData
+        method: 'POST', body: formData
       });
       var data = await res.json();
       if(data.secure_url){
         uploadedImages.push(data.secure_url);
         updateImagePreview();
-      } else {
-        alert('Upload failed: ' + JSON.stringify(data));
       }
-    }catch(err){
-      alert('Upload failed. Check console.');
-      console.log(err);
-    }
+    }catch(err){console.log(err)}
   }
 }
 
 async function handleReviewImage(e){
   var file = e.target.files[0];
-  if(!file) return;var formData = new FormData();
+  if(!file) return;
+  var formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
   formData.append('folder', 'soso-reviews');
-
   try{
     var res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
       method: 'POST',
@@ -598,7 +585,7 @@ function removeImage(index){
   updateImagePreview();
 }
 
-// ========== FIXED: Chat Reply ==========
+// ========== Chat Reply ==========
 function chatReply(type){
   var body = document.getElementById('chatBody');
   var responses = {
@@ -620,7 +607,7 @@ function chatReply(type){
   body.scrollTop = body.scrollHeight;
 }
 
-// ========== #28 INVOICE PDF GENERATOR ==========
+// ========== INVOICE PDF GENERATOR - FIXED FOR IPHONE ==========
 function generateInvoice(order){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -671,10 +658,12 @@ function generateInvoice(order){
   doc.setTextColor(212,175,55);
   doc.text(`TOTAL: ₦${order.total.toLocaleString()}`, 150, y);
 
-  doc.save(`SosoScent-Invoice-${order.id}.pdf`);
+  // FIX: Open in new tab for iPhone compatibility
+  const pdfUrl = doc.output('bloburl');
+  window.open(pdfUrl, '_blank');
 }
 
-// ========== UPDATED PROFESSIONAL WHATSAPP CHECKOUT ==========
+// ========== PREMIUM WHATSAPP CHECKOUT ==========
 function checkoutWhatsApp(){
   if(cart.length === 0){alert('Cart is empty!');return;}
 
@@ -690,10 +679,10 @@ function checkoutWhatsApp(){
   orders.unshift(order);
   saveAll();
 
-  // Generate PDF invoice #28
+  // Generate PDF invoice
   generateInvoice(order);
 
-  // Professional WhatsApp message
+  // Premium WhatsApp message
   var msg = `✨ *${bizName.toUpperCase()}* ✨%0A`;
   msg += `━━━━━━━━━━%0A`;
   msg += `🧾 *ORDER RECEIPT*%0A`;
@@ -721,7 +710,7 @@ function checkoutWhatsApp(){
   msg += `━━━━━━━━━━%0A%0A`;
   msg += `🚚 *Delivery Details:*%0A`;
   msg += `We will contact you shortly to confirm delivery address.%0A%0A`;
-  msg += `📄 Invoice PDF has been downloaded to your device.%0A%0A`;
+  msg += `📄 Invoice PDF opened in new tab. Save to Files.%0A%0A`;
   msg += `🙏 Thank you for choosing ${bizName}!%0A`;
   msg += `_Quality you can smell, luxury you can afford._`;
 
@@ -780,7 +769,7 @@ function shareProduct(id){
   window.open(`https://wa.me/?text=${msg}`,'_blank');
 }
 
-// ========== #19 SHARE WISHLIST TO WHATSAPP ==========
+// ========== SHARE WISHLIST TO WHATSAPP ==========
 function shareWishlist(){
   if(wishlist.length===0){alert('Wishlist is empty!');return;}
 
@@ -1172,7 +1161,7 @@ function loadProducts(){
   for(var i=0;i<toShow.length;i++){
     var p=toShow[i];
     var mainImg=(p.images&&p.images.length>0)
-    ? p.images[0]
+   ? p.images[0]
       : 'https://via.placeholder.com/400x400/f5f1e8/d4af37?text=No+Image';
 
     var thumbs='';
