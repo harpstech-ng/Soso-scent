@@ -6,16 +6,9 @@
 <title>Soso Scent - Premium Perfumes & Skincare</title>
 <style>
 :root{
-  --beige:#f5f1e8;
-  --white:#fff;
-  --gold:#d4af37;
-  --gold-dark:#b8941f;
-  --black:#1a1a1a;
-  --gray:#6b6b6b;
-  --red:#e74c3c;
-  --green:#27ae60;
+  --beige:#f5f1e8;--white:#fff;--gold:#d4af37;--gold-dark:#b8941f;
+  --black:#1a1a1a;--gray:#6b6b6b;--red:#e74c3c;--green:#27ae60;
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:Georgia,serif;background:var(--beige);color:var(--black)}
@@ -25,6 +18,7 @@ body{font-family:Georgia,serif;background:var(--beige);color:var(--black)}
 @keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-15px)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 @keyframes slideIn{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes typing{from{width:0}to{width:100%}}
 
 header{
   position:fixed;top:0;width:100%;background:rgba(255,255,255,0.95);
@@ -97,6 +91,16 @@ section{padding:100px 20px;min-height:100vh}
 .product-thumbs img.active{border-color:var(--gold)}
 .product-info{padding:25px}
 .product-price{font-size:1.8rem;color:var(--gold-dark);font-weight:700}
+
+.scent-meter{display:flex;gap:5px;margin:10px 0}
+.scent-meter span{
+  flex:1;height:6px;background:#ddd;border-radius:3px
+}
+.scent-meter span.active{background:var(--gold)}
+.scent-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.scent-tag{
+  background:var(--beige);padding:4px 10px;border-radius:15px;font-size:0.8rem
+}
 
 .wishlist-btn,.share-btn{
   position:absolute;top:15px;background:rgba(255,255,255,0.9);
@@ -183,7 +187,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 }
 .chat-btn span{font-size:2rem}
 .chat-box{
-  display:none;position:absolute;bottom:80px;right:0;width:300px;
+  display:none;position:absolute;bottom:80px;right:0;width:350px;
   background:var(--white);border-radius:15px;box-shadow:0 10px 40px rgba(0,0,0,0.2);
   overflow:hidden
 }
@@ -191,8 +195,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .chat-header{
   background:var(--green);color:#fff;padding:15px;font-weight:600
 }
-.chat-body{padding:20px}
-.chat-body p{margin-bottom:15px;color:var(--gray)}
+.chat-body{padding:20px;max-height:300px;overflow-y:auto}
+.chat-message{background:var(--beige);padding:10px;border-radius:10px;margin-bottom:10px}
+.chat-options{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.chat-option{
+  background:var(--white);border:1px solid var(--gold);padding:8px;
+  border-radius:8px;cursor:pointer;font-size:0.9rem
+}
+.chat-option:hover{background:var(--gold);color:#fff}
 
 .social-proof{
   position:fixed;bottom:30px;left:30px;background:var(--white);
@@ -202,7 +212,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .social-proof.show{display:flex}
 .social-proof img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 
-/* NEW: Sticky cart bar */
 .sticky-cart-bar{
   position:fixed;bottom:0;left:0;right:0;background:var(--white);
   padding:15px 20px;box-shadow:0 -5px 20px rgba(0,0,0,0.1);
@@ -211,15 +220,20 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .sticky-cart-bar.show{display:flex}
 .sticky-cart-bar.btn{flex:1}
 
-/* NEW: UGC Gallery */
 .ugc-gallery{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
   gap:10px;margin-top:20px
 }
 .ugc-gallery img{width:100%;height:150px;object-fit:cover;border-radius:12px;cursor:pointer}
 
-/* NEW: Loading indicator for infinite scroll */
 .loading{text-align:center;padding:40px;color:var(--gray);font-size:1.2rem}
+
+/* 404 Page */
+.error-page{
+  text-align:center;padding:100px 20px
+}
+.error-page h1{font-size:6rem;color:var(--gold-dark)}
+.error-page p{font-size:1.5rem;color:var(--gray);margin:20px 0}
 
 footer{
   background:var(--black);color:var(--white);padding:40px 20px;text-align:center
@@ -244,6 +258,7 @@ footer{
 .chat-widget{bottom:20px;right:20px}
 .social-proof{left:20px;right:20px;bottom:100px}
 .sticky-cart-bar{padding-bottom:25px}
+.chat-box{width:90vw;right:5vw}
 </style>
 </head>
 <body>
@@ -253,6 +268,7 @@ footer{
   <ul class="nav-links" id="navLinks">
     <li><a href="#home" onclick="closeMenu()">Home</a></li>
     <li><a href="#products" onclick="closeMenu()">Products</a></li>
+    <li><a href="#track" onclick="closeMenu()">Track Order</a></li>
     <li><a href="#ugc" onclick="closeMenu()">Gallery</a></li>
     <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
   </ul>
@@ -276,19 +292,27 @@ footer{
 <section id="products" style="background:var(--white)">
   <div class="container">
     <h2 class="section-title">Our Collection</h2>
-
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Search products..." oninput="searchProducts()">
     </div>
-
     <div id="promoBanner"></div>
     <div class="product-grid" id="productGrid"></div>
     <div class="loading" id="loading" style="display:none">Loading more products...</div>
   </div>
 </section>
 
-<!-- NEW: UGC Gallery Section -->
-<section id="ugc" style="background:var(--beige)">
+<section id="track" style="background:var(--beige)">
+  <div class="container">
+    <h2 class="section-title">Track Your Order 📦</h2>
+    <div style="max-width:500px;margin:0 auto;text-align:center">
+      <input type="text" id="trackOrderId" placeholder="Enter Order ID e.g. SS123456">
+      <button class="btn" onclick="trackOrder()">Track Order</button>
+      <div id="trackResult" style="margin-top:30px"></div>
+    </div>
+  </div>
+</section>
+
+<section id="ugc" style="background:var(--white)">
   <div class="container">
     <h2 class="section-title">Customer Gallery 📸</h2>
     <p style="text-align:center;margin-bottom:20px">Tag us @sososcent to get featured</p>
@@ -296,7 +320,7 @@ footer{
   </div>
 </section>
 
-<section id="contact" style="background:var(--white)">
+<section id="contact" style="background:var(--beige)">
   <div class="container">
     <h2 class="section-title">Get In Touch</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;text-align:center">
@@ -311,7 +335,6 @@ footer{
   </div>
 </section>
 
-<!-- NEW: Sticky Cart Bar -->
 <div class="sticky-cart-bar" id="stickyCartBar">
   <div>
     <div id="stickyProductName" style="font-weight:600"></div>
@@ -332,11 +355,15 @@ footer{
 
 <div class="chat-widget">
   <div class="chat-box" id="chatBox">
-    <div class="chat-header">💬 Chat with us</div>
-    <div class="chat-body">
-      <p>Hi! Need help finding your perfect scent?</p>
-      <p>We're online and ready to assist you.</p>
-      <a href="#" class="btn" onclick="openWhatsAppChat()">Chat on WhatsApp</a>
+    <div class="chat-header">💬 Soso Assistant</div>
+    <div class="chat-body" id="chatBody">
+      <div class="chat-message">Hi! I'm here to help. What do you need?</div>
+      <div class="chat-options">
+        <div class="chat-option" onclick="chatReply('delivery')">🚚 Delivery Time?</div>
+        <div class="chat-option" onclick="chatReply('original')">✅ Are products original?</div>
+        <div class="chat-option" onclick="chatReply('return')">🔄 Return Policy?</div>
+        <div class="chat-option" onclick="chatReply('human')">👨 Talk to Human</div>
+      </div>
     </div>
   </div>
   <div class="chat-btn" onclick="toggleChat()">
@@ -352,17 +379,27 @@ footer{
   </div>
 </div>
 
+<!-- 404 Error Page - Hidden by default -->
+<div id="error404" style="display:none">
+  <div class="error-page">
+    <h1>404</h1>
+    <p>Omo you lost? 😅</p>
+    <p>But here's what's trending instead:</p>
+    <div class="product-grid" id="errorProducts" style="max-width:800px;margin:40px auto"></div>
+    <a href="#home" class="btn">Go Home</a>
+  </div>
+</div>
+
+<!-- All Modals -->
 <div class="modal" id="cartModal">
   <div class="modal-content">
     <div class="modal-header"><h2>Your Cart</h2><span class="close-btn" onclick="toggleCart()">&times;</span></div>
     <div id="cartItems"></div>
-
     <div style="margin:20px 0">
       <input type="text" id="promoInput" placeholder="Enter promo code">
       <button class="btn-small btn-success" onclick="applyPromo()">Apply</button>
       <div id="promoMessage" style="margin-top:10px;color:var(--green);font-weight:600"></div>
     </div>
-
     <h3 style="margin:20px 0 10px">Select Payment Method</h3>
     <div class="payment-options" id="paymentOptions">
       <label class="payment-option active">
@@ -378,9 +415,8 @@ footer{
         <span>💳 Pay with Card</span>
       </label>
     </div>
-
     <div id="cartTotal" style="font-size:1.8rem;font-weight:700;color:var(--gold-dark);text-align:right;margin:25px 0">Total: ₦0</div>
-    <button class="btn" style="width:100%" onclick="checkout()">Checkout on WhatsApp</button>
+    <button class="btn" style="width:100%" onclick="checkoutWhatsApp()">Checkout on WhatsApp</button>
   </div>
 </div>
 
@@ -426,7 +462,6 @@ footer{
     <div style="background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;padding:30px;border-radius:15px;margin-bottom:30px;text-align:center">
       <h2>Welcome Boss! 👑</h2><p>Manage your store here</p>
     </div>
-
     <div class="tab-nav">
       <button class="tab-btn active" onclick="switchTab('products')">Products</button>
       <button class="tab-btn" onclick="switchTab('promo')">Promo Codes</button>
@@ -434,7 +469,6 @@ footer{
       <button class="tab-btn" onclick="switchTab('orders')">Orders</button>
       <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
     </div>
-
     <div class="tab-content" id="tab-products">
       <div style="margin-bottom:30px;padding-bottom:30px;border-bottom:2px solid var(--beige)">
         <h3>Add/Edit Product</h3>
@@ -443,6 +477,22 @@ footer{
         <input type="number" id="prodPrice" placeholder="Price (₦)">
         <input type="number" id="prodStock" placeholder="Stock Quantity">
         <input type="text" id="prodDesc" placeholder="Description">
+        <select id="prodScent">
+          <option value="">Select Scent Type</option>
+          <option value="Oud">Oud</option>
+          <option value="Vanilla">Vanilla</option>
+          <option value="Citrus">Citrus</option>
+          <option value="Woody">Woody</option>
+          <option value="Floral">Floral</option>
+          <option value="Musky">Musky</option>
+        </select>
+        <select id="prodStrength">
+          <option value="1">Strength: Light</option>
+          <option value="2">Strength: Medium</option>
+          <option value="3">Strength: Strong</option>
+          <option value="4">Strength: Very Strong</option>
+          <option value="5">Strength: Extreme</option>
+        </select>
         <input type="file" id="prodImages" accept="image/*" multiple>
         <div class="upload-preview" id="uploadPreview"></div>
         <button class="btn" onclick="saveProduct()">Save Product</button>
@@ -450,7 +500,6 @@ footer{
       </div>
       <div id="adminProductList"></div>
     </div>
-
     <div class="tab-content" id="tab-promo" style="display:none">
       <h3>Manage Promo Codes</h3>
       <input type="text" id="promoCode" placeholder="Code e.g. SOSO10">
@@ -462,17 +511,14 @@ footer{
       <button class="btn" onclick="savePromo()">Create Promo</button>
       <div id="promoList" style="margin-top:20px"></div>
     </div>
-
     <div class="tab-content" id="tab-reviews" style="display:none">
       <h3>Customer Reviews</h3>
       <div id="adminReviewList"></div>
     </div>
-
     <div class="tab-content" id="tab-orders" style="display:none">
       <h3>Recent Orders</h3>
       <div id="ordersList"><p>No orders yet</p></div>
     </div>
-
     <div class="tab-content" id="tab-settings" style="display:none">
       <h3>Business Settings</h3>
       <input type="text" id="bizName" placeholder="Business Name" value="Soso Scent">
@@ -484,8 +530,9 @@ footer{
 </div>
 
 <script>
+// Data
 var products = JSON.parse(localStorage.getItem('sosoProducts')) || [
-  {id:1,name:"Mystical ASAD Perfume 30ml",price:3000,desc:"Long lasting luxury scent",images:[],stock:10,reviews:[]}
+  {id:1,name:"Mystical ASAD Perfume 30ml",price:3000,desc:"Long lasting luxury scent",images:[],stock:10,scent:"Oud",strength:4,reviews:[]}
 ];
 var cart = JSON.parse(localStorage.getItem('sosoCart')) || [];
 var wishlist = JSON.parse(localStorage.getItem('sosoWishlist')) || [];
@@ -497,6 +544,7 @@ var adminPassword = localStorage.getItem('sosoAdminPass') || 'soso123';
 var bizName = localStorage.getItem('sosoBizName') || 'Soso Scent';
 var bizNumber = localStorage.getItem('sosoBizNum') || '2347042468992';
 var customerPhone = localStorage.getItem('sosoCustomerPhone') || '';
+var customerName = localStorage.getItem('sosoCustomerName') || '';
 var tapCount = 0;
 var tapTimer = null;
 var uploadedImages = [];
@@ -508,7 +556,9 @@ var selectedPayment = 'cod';
 var currentPage = 1;
 var productsPerPage = 6;
 var loading = false;
+var abandonedCartTimer = null;
 
+// Event Listeners
 document.getElementById('prodImages').addEventListener('change',handleImageUpload);
 document.getElementById('reviewImage').addEventListener('change',handleReviewImage);
 document.getElementById('reviewVideo').addEventListener('change',handleReviewVideo);
@@ -521,8 +571,163 @@ document.querySelectorAll('input[name="payment"]').forEach(radio=>{
   });
 });
 
+// Feature 13: Abandoned Cart Reminder
+function startAbandonedCartTimer(){
+  clearTimeout(abandonedCartTimer);
+  if(cart.length>0 && customerPhone){
+    abandonedCartTimer=setTimeout(()=>{
+      var msg=`Hey ${customerName||'there'}! You left items in your cart at Soso Scent 😏%0A`;
+      cart.forEach(i=>msg+=`➤ ${i.name} x${i.qty}%0A`);
+      msg+=`%0AComplete your order here: ${window.location.origin}`;
+      window.open(`https://wa.me/${customerPhone}?text=${msg}`,'_blank');
+    },3600000); // 1 hour
+  }
+}
+
+// Feature 14: Order Status Updates
+function updateOrderStatus(orderId,status){
+  var order=orders.find(o=>o.id==orderId);
+  if(order && order.phone){
+    order.status=status;
+    localStorage.setItem('sosoOrders',JSON.stringify(orders));
+    var msg=`Hi! Your order ${orderId} status: *${status}*%0A`;
+    if(status=='Shipped')msg+='Your package is on the way! 🚚';
+    if(status=='Delivered')msg+='Thank you for shopping with us! 💎';
+    window.open(`https://wa.me/${order.phone}?text=${msg}`,'_blank');
+  }
+}
+
+// Feature 20: Live Chat Bot
+function chatReply(type){
+  var body=document.getElementById('chatBody');
+  var responses={
+    delivery:{msg:"Delivery takes 1-3 business days nationwide. Lagos is 24hrs 🚚"},
+    original:{msg:"100% Original guaranteed! We source directly from distributors ✅"},
+    return:{msg:"7-day return/exchange policy. Item must be unused 🔄"},
+    human:{msg:"Connecting you to WhatsApp now..."}
+  };
+  body.innerHTML+=`<div class="chat-message" style="background:var(--gold);color:#fff">${responses[type].msg}</div>`;
+  if(type=='human'){
+    setTimeout(()=>window.open(`https://wa.me/${bizNumber}`,'_blank'),1000);
+  }
+  body.scrollTop=body.scrollHeight;
+}
+
+// Feature 19: Custom 404
+function show404(){
+  document.querySelectorAll('section').forEach(s=>s.style.display='none');
+  document.getElementById('error404').style.display='block';
+  var trending=products.slice(0,3);
+  var html='';
+  trending.forEach(p=>{
+    html+=`<div class="product-card">
+      <img src="${p.images[0]||'https://via.placeholder.com/400'}" class="product-img">
+      <div class="product-info">
+        <h3>${p.name}</h3>
+        <div class="product-price">₦${p.price.toLocaleString()}</div>
+        <button class="btn" onclick="addToCart(${p.id})">Add to Cart</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('errorProducts').innerHTML=html;
+}
+
+// Feature 11: Track Order
+function trackOrder(){
+  var id=document.getElementById('trackOrderId').value;
+  var order=orders.find(o=>o.id==id);
+  if(!order){
+    document.getElementById('trackResult').innerHTML='<p style="color:var(--red)">Order not found</p>';
+    return;
+  }
+  var status=order.status || 'Processing';
+  var html=`<div style="background:var(--white);padding:25px;border-radius:15px;text-align:left">
+    <h3>Order ${order.id}</h3>
+    <p style="margin:10px 0"><strong>Status:</strong> <span style="color:var(--green);font-weight:600">${status}</span></p>
+    <p><strong>Date:</strong> ${order.date}</p>
+    <p><strong>Total:</strong> ₦${order.total.toLocaleString()}</p>
+    <p><strong>Payment:</strong> ${order.payment}</p>
+    <hr style="margin:15px 0">
+    <h4>Items:</h4>`;
+
+  order.items.forEach(i=>{
+    html+=`<p>• ${i.name} x${i.qty} - ₦${(i.price*i.qty).toLocaleString()}</p>`;
+  });
+
+  html+=`</div>`;
+  document.getElementById('trackResult').innerHTML=html;
+}
+
+// Feature 1: WhatsApp Auto-Fill Checkout
+function checkoutWhatsApp(){
+  if(cart.length===0){alert('Cart is empty!');return;}
+
+  var subtotal=cart.reduce((sum,item)=>sum+item.price*item.qty,0);
+  var discount=0;
+  if(appliedPromo){
+    discount=appliedPromo.type=='percent'?subtotal*(appliedPromo.value/100):appliedPromo.value;
+  }
+  var total=subtotal-discount;
+
+  var orderId='SS'+Date.now().toString().slice(-6);
+  var orderDate=new Date().toLocaleString('en-NG',{dateStyle:'medium',timeStyle:'short'});
+  var paymentText=selectedPayment=='cod'?'Pay on Delivery':selectedPayment=='transfer'?'Bank Transfer':'Pay with Card';
+
+  var order={id:orderId,date:orderDate,items:cart,total:total,promo:appliedPromo,payment:paymentText,phone:customerPhone,status:'Processing'};
+  orders.unshift(order);
+  localStorage.setItem('sosoOrders',JSON.stringify(orders));
+
+  // Auto-fill WhatsApp message
+  var msg=`*✨ ${bizName} Order Receipt ✨*%0A`;
+  msg+='═══════════════%0A';
+  msg+=`*Order ID:* ${orderId}%0A`;
+  msg+=`*Customer:* ${customerName||'Guest'}%0A`;
+  msg+=`*Phone:* ${customerPhone}%0A`;
+  msg+=`*Date:* ${orderDate}%0A`;
+  msg+=`*Payment:* ${paymentText}%0A`;
+  msg+='═══════════════%0A%0A';
+  msg+='*ORDER DETAILS*%0A';
+
+  cart.forEach(i=>{
+    msg+=`➤ ${i.name}%0A`;
+    msg+=`Qty: ${i.qty} x ₦${i.price.toLocaleString()}%0A`;
+    msg+=`Subtotal: ₦${(i.price*i.qty).toLocaleString()}%0A%0A`;
+  });
+
+  msg+='═══════════════%0A';
+  msg+=`*Subtotal:* ₦${subtotal.toLocaleString()}%0A`;
+  if(discount>0){
+    msg+=`*Discount:* -₦${discount.toLocaleString()}%0A`;
+  }
+  msg+=`*TOTAL: ₦${total.toLocaleString()}*%0A`;
+  msg+='═══════════════%0A%0A';
+  msg+=`_Please confirm my order and delivery details._%0A`;
+  msg+=`_Thank you!_`;
+
+  window.open(`https://wa.me/${bizNumber}?text=${msg}`,'_blank');
+
+  // Start abandoned cart timer reset
+  startAbandonedCartTimer();
+
+  setTimeout(()=>{
+    cart=[];appliedPromo=null;selectedPayment='cod';
+    updateCart();toggleCart();loadOrders();
+  },1000);
+}
+
+// Feature 9: Scent Notes + Strength Meter
+function renderScentMeter(strength){
+  var html='<div class="scent-meter">';
+  for(var i=1;i<=5;i++){
+    html+=`<span class="${i<=strength?'active':''}"></span>`;
+  }
+  html+='</div>';
+  return html;
+}
+
+// Rest of your existing functions with updates for new features
 function getCustomerTier(){
-  var totalSpent = orders.filter(o=>o.phone==customerPhone).reduce((sum,o)=>sum+o.total,0);
+  var totalSpent=orders.filter(o=>o.phone==customerPhone).reduce((sum,o)=>sum+o.total,0);
   if(totalSpent>=50000)return{level:'Gold',discount:20};
   if(totalSpent>=20000)return{level:'Silver',discount:15};
   if(totalSpent>=5000)return{level:'Bronze',discount:10};
@@ -554,7 +759,7 @@ function handleImageUpload(e){
 
 function handleReviewImage(e){
   var file=e.target.files[0];
-  if(!file) return;
+  if(!file)return;
   var reader=new FileReader();
   reader.onload=function(event){
     reviewImage=event.target.result;
@@ -565,7 +770,7 @@ function handleReviewImage(e){
 
 function handleReviewVideo(e){
   var file=e.target.files[0];
-  if(!file) return;
+  if(!file)return;
   var reader=new FileReader();
   reader.onload=function(event){
     reviewVideo=event.target.result;
@@ -603,10 +808,6 @@ function closeMenu(){
 
 function toggleChat(){
   document.getElementById('chatBox').classList.toggle('active');
-}
-
-function openWhatsAppChat(){
-  window.location.href='https://wa.me/'+bizNumber+'?text=Hi! I need help with Soso Scent products.';
 }
 
 function shareProduct(id){
@@ -745,21 +946,21 @@ function loadPromos(){
       '<button class="btn-small btn-delete" onclick="deletePromo('+i+')">Delete</button>' +
     '</div>';
   }
-  document.getElementById('promoList').innerHTML=html || '<p>No promos yet</p>';
+  document.getElementById('promoList').innerHTML=html||'<p>No promos yet</p>';
 }
 
 function showPromoBanner(){
-  if(promos.length === 0){
+  if(promos.length===0){
     document.getElementById('promoBanner').innerHTML='';
     return;
   }
-  var html = '';
-  for(var i=0; i<promos.length; i++){
-    var p = promos[i];
-    var text = p.type == 'percent'? p.value + '% OFF' : '₦' + p.value + ' OFF';
-    html += '<div class="promo-tag">🎉 Use code <strong>' + p.code + '</strong> for ' + text + '</div>';
+  var html='';
+  for(var i=0;i<promos.length;i++){
+    var p=promos[i];
+    var text=p.type=='percent'?p.value+'% OFF':'₦'+p.value+' OFF';
+    html+='<div class="promo-tag">🎉 Use code <strong>'+p.code+'</strong> for '+text+'</div>';
   }
-  document.getElementById('promoBanner').innerHTML = html;
+  document.getElementById('promoBanner').innerHTML=html;
 }
 
 function applyPromo(){
@@ -800,7 +1001,9 @@ function submitReview(){
   if(!name||!text||!phone){alert('Fill all fields!');return}
 
   customerPhone=phone;
+  customerName=name;
   localStorage.setItem('sosoCustomerPhone',phone);
+  localStorage.setItem('sosoCustomerName',name);
 
   var review={
     id:Date.now(),
@@ -864,6 +1067,8 @@ function saveProduct(){
   var price=parseInt(document.getElementById('prodPrice').value);
   var stock=parseInt(document.getElementById('prodStock').value)||0;
   var desc=document.getElementById('prodDesc').value;
+  var scent=document.getElementById('prodScent').value;
+  var strength=parseInt(document.getElementById('prodStrength').value);
 
   if(!name||!price||!desc){alert('Fill all fields!');return}
 
@@ -877,12 +1082,14 @@ function saveProduct(){
         products[i].price=price;
         products[i].stock=stock;
         products[i].desc=desc;
+        products[i].scent=scent;
+        products[i].strength=strength;
         products[i].images=imgs;
         products[i].reviews=existingReviews;
       }
     }
   }else{
-    products.push({id:Date.now(),name:name,price:price,stock:stock,desc:desc,images:imgs,reviews:[]});
+    products.push({id:Date.now(),name:name,price:price,stock:stock,desc:desc,scent:scent,strength:strength,images:imgs,reviews:[]});
   }
   localStorage.setItem('sosoProducts',JSON.stringify(products));
   filteredProducts=products;
@@ -898,6 +1105,8 @@ function editProduct(id){
       document.getElementById('prodPrice').value=products[i].price;
       document.getElementById('prodStock').value=products[i].stock||0;
       document.getElementById('prodDesc').value=products[i].desc;
+      document.getElementById('prodScent').value=products[i].scent||'';
+      document.getElementById('prodStrength').value=products[i].strength||1;
       uploadedImages=products[i].images||[];
       updateImagePreview();
       switchTab('products');
@@ -921,6 +1130,8 @@ function clearForm(){
   document.getElementById('prodPrice').value='';
   document.getElementById('prodStock').value='';
   document.getElementById('prodDesc').value='';
+  document.getElementById('prodScent').value='';
+  document.getElementById('prodStrength').value='1';
   uploadedImages=[];
   updateImagePreview();
   document.getElementById('prodImages').value='';
@@ -951,11 +1162,13 @@ function loadOrders(){
     for(var i=0;i<orders.length;i++){
       var o=orders[i];
       html+='<div style="background:var(--beige);padding:20px;border-radius:15px;margin-bottom:15px">' +
-        '<strong>Order #'+o.id+'</strong><br>' +
+        '<strong>Order #'+o.id+'</strong> - <span style="color:var(--green)">'+(o.status||'Processing')+'</span><br>' +
         '<small>'+o.date+'</small><br>' +
         '<p>Total: ₦'+o.total.toLocaleString()+'</p>' +
         '<small>Phone: '+o.phone+'</small><br>' +
-        '<small>Payment: '+o.payment+'</small>' +
+        '<small>Payment: '+o.payment+'</small><br>' +
+        '<button class="btn-small btn-edit" onclick="updateOrderStatus(\''+o.id+'\',\'Shipped\')">Mark Shipped</button> ' +
+        '<button class="btn-small btn-success" onclick="updateOrderStatus(\''+o.id+'\',\'Delivered\')">Mark Delivered</button>' +
       '</div>';
     }
   }
@@ -976,9 +1189,9 @@ function loadProducts(){
   var end=currentPage*productsPerPage;
   var toShow=filteredProducts.slice(start,end);
 
-  var html = '';
-  for(var i=0; i<toShow.length; i++){
-    var p = toShow[i];
+  var html='';
+  for(var i=0;i<toShow.length;i++){
+    var p=toShow[i];
     var mainImg=p.images&&p.images.length>0?p.images[0]:'https://via.placeholder.com/400x400/f5f1e8/d4af37?text=Product';
     var thumbs='';
     if(p.images&&p.images.length>1){
@@ -987,7 +1200,7 @@ function loadProducts(){
       }
     }
 
-    var isWishlisted = wishlist.find(w=>w.id==p.id);
+    var isWishlisted=wishlist.find(w=>w.id==p.id);
     var productReviews=reviews.filter(r=>r.productId==p.id);
     var avgRating=productReviews.length>0?productReviews.reduce((a,b)=>a+b.rating,0)/productReviews.length:0;
     var reviewHtml='';
@@ -997,11 +1210,11 @@ function loadProducts(){
         var r=productReviews[j];
         var isVerified=orders.some(o=>o.phone==r.phone&&o.items.some(i=>i.id==p.id));
         var stars='';
-        for(var k=0;k<r.rating;k++) stars+='★';
+        for(var k=0;k<r.rating;k++)stars+='★';
         reviewHtml+='<div class="review-item">' +
           '<div class="review-header">' +
             (r.image?'<img src="'+r.image+'" class="review-img">':'') +
-            '<div><strong>'+r.name+'</strong> '+ (isVerified?'<span class="verified-badge">✓ Verified</span>':'') +
+            '<div><strong>'+r.name+'</strong> '+(isVerified?'<span class="verified-badge">✓ Verified</span>':'') +
             '<div class="stars">'+stars+'</div></div>' +
           '</div>' +
           '<p>'+r.text+'</p>' +
@@ -1011,23 +1224,25 @@ function loadProducts(){
       reviewHtml+='</div>';
     }
 
-    html += '<div class="product-card" id="product-'+p.id+'">' +
+    html+='<div class="product-card" id="product-'+p.id+'">' +
       '<button class="share-btn" onclick="shareProduct('+p.id+')">📤</button>'+
       '<button class="wishlist-btn '+(isWishlisted?'active':'')+'" onclick="addToWishlist('+p.id+')">❤️</button>'+
       '<img src="'+mainImg+'" class="product-img" id="mainImg-'+p.id+'">' +
       '<div class="product-thumbs">'+thumbs+'</div>'+
       '<div class="product-info">' +
-        '<div style="font-size:1.3rem;font-weight:600;margin-bottom:10px">' + p.name + '</div>' +
-        '<p style="color:var(--gray);margin-bottom:15px">' + p.desc + '</p>' +
-        '<div class="product-price">₦' + p.price.toLocaleString() + '</div>' +
+        '<div style="font-size:1.3rem;font-weight:600;margin-bottom:10px">'+p.name+'</div>' +
+        '<p style="color:var(--gray);margin-bottom:10px">'+p.desc+'</p>' +
+        (p.scent?'<div class="scent-tags"><span class="scent-tag">'+p.scent+'</span></div>':'') +
+        (p.strength?renderScentMeter(p.strength):'') +
+        '<div class="product-price">₦'+p.price.toLocaleString()+'</div>' +
         (avgRating>0?'<div>⭐ '+avgRating.toFixed(1)+' ('+productReviews.length+' reviews)</div>':'') +
         '<button class="btn" style="width:100%;margin-top:15px" onclick="showStickyCart('+p.id+')">Add to Cart</button>' +
         '<button class="btn-small btn-edit" style="width:100%;margin-top:10px" onclick="openReviewModal('+p.id+')">Write Review</button>' +
-        reviewHtml +
-      '</div>' +
+        reviewHtml+
+      '</div>'+
     '</div>';
   }
-  document.getElementById('productGrid').innerHTML = html||'<p style="text-align:center">No products found</p>';
+  document.getElementById('productGrid').innerHTML=html||'<p style="text-align:center">No products found</p>';
 }
 
 function loadUGC(){
@@ -1035,7 +1250,7 @@ function loadUGC(){
   ugcImages.forEach(img=>{
     html+=`<img src="${img}" onclick="window.open('${img}','_blank')">`;
   });
-  document.getElementById('ugcGallery').innerHTML=html || '<p style="text-align:center">No customer photos yet</p>';
+  document.getElementById('ugcGallery').innerHTML=html||'<p style="text-align:center">No customer photos yet</p>';
 }
 
 function switchImage(prodId,imgIndex){
@@ -1047,54 +1262,51 @@ function switchImage(prodId,imgIndex){
 }
 
 function addToCart(id){
-  var product = null;
-  for(var i=0; i<products.length; i++){
-    if(products[i].id == id){product = products[i]; break;}
+  var product=null;
+  for(var i=0;i<products.length;i++){
+    if(products[i].id==id){product=products[i];break;}
   }
-  var existing = null;
-  for(var i=0; i<cart.length; i++){
-    if(cart[i].id == id){existing = cart[i]; break;}
+  var existing=null;
+  for(var i=0;i<cart.length;i++){
+    if(cart[i].id==id){existing=cart[i];break;}
   }
   if(existing){existing.qty++;}
   else{cart.push({id:product.id,name:product.name,price:product.price,images:product.images,qty:1});}
   updateCart();
-  alert(product.name + ' added to cart');
+  startAbandonedCartTimer();
+  alert(product.name+' added to cart');
 }
 
 function updateCart(){
   localStorage.setItem('sosoCart',JSON.stringify(cart));
-  document.getElementById('cartCount').textContent = cart.reduce(function(sum,item){return sum + item.qty}, 0);
-  var cartItems = document.getElementById('cartItems');
-  if(cart.length === 0){
-    cartItems.innerHTML = '<p style="text-align:center;color:var(--gray)">Your cart is empty</p>';
-    document.getElementById('cartTotal').textContent = 'Total: ₦0';
+  document.getElementById('cartCount').textContent=cart.reduce(function(sum,item){return sum+item.qty},0);
+  var cartItems=document.getElementById('cartItems');
+  if(cart.length===0){
+    cartItems.innerHTML='<p style="text-align:center;color:var(--gray)">Your cart is empty</p>';
+    document.getElementById('cartTotal').textContent='Total: ₦0';
     return;
   }
-  var html = '';
-  var subtotal = 0;
-  for(var i=0; i<cart.length; i++){
-    var item = cart[i];
+  var html='';
+  var subtotal=0;
+  for(var i=0;i<cart.length;i++){
+    var item=cart[i];
     var img=item.images&&item.images.length>0?item.images[0]:'';
-    html += '<div style="border-bottom:1px solid #eee;padding:15px 0;display:flex;gap:15px">' +
-      '<img src="' + img + '" style="width:70px;height:70px;object-fit:cover;border-radius:12px">' +
-      '<div style="flex:1"><strong>' + item.name + '</strong><br>₦' + item.price.toLocaleString() + ' x ' + item.qty + '</div>' +
-      '<strong style="color:var(--gold-dark)">₦' + (item.price * item.qty).toLocaleString() + '</strong>' +
+    html+='<div style="border-bottom:1px solid #eee;padding:15px 0;display:flex;gap:15px">' +
+      '<img src="'+img+'" style="width:70px;height:70px;object-fit:cover;border-radius:12px">' +
+      '<div style="flex:1"><strong>'+item.name+'</strong><br>₦'+item.price.toLocaleString()+' x '+item.qty+'</div>' +
+      '<strong style="color:var(--gold-dark)">₦'+(item.price*item.qty).toLocaleString()+'</strong>' +
     '</div>';
-    subtotal += item.price * item.qty;
+    subtotal+=item.price*item.qty;
   }
 
   var discount=0;
   if(appliedPromo){
-    if(appliedPromo.type=='percent'){
-      discount=subtotal*(appliedPromo.value/100);
-    }else{
-      discount=appliedPromo.value;
-    }
+    discount=appliedPromo.type=='percent'?subtotal*(appliedPromo.value/100):appliedPromo.value;
   }
   var total=subtotal-discount;
 
-  cartItems.innerHTML = html;
-  document.getElementById('cartTotal').innerHTML =
+  cartItems.innerHTML=html;
+  document.getElementById('cartTotal').innerHTML=
     'Subtotal: ₦'+subtotal.toLocaleString()+'<br>'+
     (discount>0?'<span style="color:var(--green)">Discount: -₦'+discount.toLocaleString()+'</span><br>':'')+
     '<strong>Total: ₦'+total.toLocaleString()+'</strong>';
@@ -1108,94 +1320,29 @@ function toggleCart(){
   updateCart();
 }
 
-function checkout(){
-  if(cart.length === 0){alert('Cart is empty!');return;}
-
-  var subtotal = cart.reduce(function(sum,item){return sum + item.price * item.qty}, 0);
-  var discount=0;
-  if(appliedPromo){
-    if(appliedPromo.type=='percent'){
-      discount=subtotal*(appliedPromo.value/100);
-    }else{
-      discount=appliedPromo.value;
-    }
-  }
-  var total=subtotal-discount;
-
-  var orderId = 'SS' + Date.now().toString().slice(-6);
-  var orderDate = new Date().toLocaleString('en-NG', {dateStyle:'medium', timeStyle:'short'});
-  var paymentText = selectedPayment=='cod'?'Pay on Delivery':selectedPayment=='transfer'?'Bank Transfer':'Pay with Card';
-
-  var order={id:orderId,date:orderDate,items:cart,total:total,promo:appliedPromo,payment:paymentText,phone:customerPhone};
-  orders.unshift(order);
-  localStorage.setItem('sosoOrders',JSON.stringify(orders));
-
-  var msg = '*✨ '+bizName+' Official Receipt ✨*%0A';
-  msg += '═══════════════%0A';
-  msg += '*Order ID:* ' + orderId + '%0A';
-  msg += '*Date:* ' + orderDate + '%0A';
-  msg += '*Payment:* ' + paymentText + '%0A';
-  msg += '═══════════════%0A%0A';
-
-  msg += '*ORDER DETAILS*%0A';
-  for(var i=0; i<cart.length; i++){
-    var item = cart[i];
-    msg += '➤ ' + item.name + '%0A';
-    msg += ' Qty: ' + item.qty + ' x ₦' + item.price.toLocaleString() + '%0A';
-    msg += ' Subtotal: ₦' + (item.price * item.qty).toLocaleString() + '%0A%0A';
-  }
-
-  msg += '═══════════════%0A';
-  msg += '*Subtotal:* ₦' + subtotal.toLocaleString() + '%0A';
-  if(discount>0){
-    msg += '*Discount:* -₦' + discount.toLocaleString() + '%0A';
-  }
-  msg += '*TOTAL: ₦' + total.toLocaleString() + '*%0A';
-  msg += '═══════════════%0A%0A';
-
-  msg += '*DELIVERY DETAILS*%0A';
-  msg += 'Please send your:%0A';
-  msg += '1. Full Name%0A';
-  msg += '2. Delivery Address%0A';
-  msg += '3. Phone Number%0A%0A';
-
-  msg += '_Thank you for choosing '+bizName+'._%0A';
-  msg += '_100% original products guaranteed._%0A';
-  msg += '_Delivery takes 1-3 business days._%0A%0A';
-  msg += '💎 *Luxury Scents, Affordable Prices* 💎';
-
-  window.open('https://wa.me/'+bizNumber+'?text=' + msg, '_blank');
-
-  setTimeout(function(){
-    cart=[];appliedPromo=null;selectedPayment='cod';updateCart();toggleCart();loadOrders();
-  }, 1000);
-}
-
 function typeWriter(){
-  var texts = ['Premium Perfumes & Skincare','100% Original Products','Affordable Luxury','Delivered Nationwide'];
-  var textIndex = 0,charIndex = 0,isDeleting = false;
-  var el = document.getElementById('typewriter');
+  var texts=['Premium Perfumes & Skincare','100% Original Products','Affordable Luxury','Delivered Nationwide'];
+  var textIndex=0,charIndex=0,isDeleting=false;
+  var el=document.getElementById('typewriter');
   function type(){
-    var currentText = texts[textIndex];
-    if(isDeleting){charIndex--;el.textContent = currentText.substring(0,charIndex);}
-    else{charIndex++;el.textContent = currentText.substring(0,charIndex);}
-    if(!isDeleting && charIndex === currentText.length){setTimeout(function(){isDeleting=true},2000);}
-    else if(isDeleting && charIndex === 0){isDeleting = false;textIndex = (textIndex + 1) % texts.length;}
+    var currentText=texts[textIndex];
+    if(isDeleting){charIndex--;el.textContent=currentText.substring(0,charIndex);}
+    else{charIndex++;el.textContent=currentText.substring(0,charIndex);}
+    if(!isDeleting&&charIndex===currentText.length){setTimeout(function(){isDeleting=true},2000);}
+    else if(isDeleting&&charIndex===0){isDeleting=false;textIndex=(textIndex+1)%texts.length;}
     setTimeout(type,isDeleting?40:80);
   }
   type();
 }
 
-// Social proof popup
-var proofMessages = [
-  {name:"Ada", city:"Lagos", product:"Mystical ASAD", img:"https://via.placeholder.com/40"},
-  {name:"Emeka", city:"Abuja", product:"Oud Royal", img:"https://via.placeholder.com/40"},
-  {name:"Blessing", city:"PH", product:"Vanilla Dream", img:"https://via.placeholder.com/40"},
-  {name:"Chinonso", city:"Enugu", product:"Citrus Blast", img:"https://via.placeholder.com/40"}
+var proofMessages=[
+  {name:"Ada",city:"Lagos",product:"Mystical ASAD",img:"https://via.placeholder.com/40"},
+  {name:"Emeka",city:"Abuja",product:"Oud Royal",img:"https://via.placeholder.com/40"},
+  {name:"Blessing",city:"PH",product:"Vanilla Dream",img:"https://via.placeholder.com/40"}
 ];
 
 function showSocialProof(){
-  var proof = proofMessages[Math.floor(Math.random()*proofMessages.length)];
+  var proof=proofMessages[Math.floor(Math.random()*proofMessages.length)];
   document.getElementById('proofImg').src=proof.img;
   document.getElementById('proofText').textContent=proof.name+" from "+proof.city+" just bought "+proof.product;
   document.getElementById('proofTime').textContent=Math.floor(Math.random()*10+1)+" minutes ago";
@@ -1220,7 +1367,14 @@ window.addEventListener('scroll',()=>{
   }
 });
 
-window.onload = function(){
+// 404 Handler
+window.addEventListener('error',function(){
+  if(window.location.hash&&!document.querySelector(window.location.hash)){
+    show404();
+  }
+});
+
+window.onload=function(){
   loadProducts();
   loadUGC();
   updateCart();
@@ -1229,6 +1383,7 @@ window.onload = function(){
   updateLoyaltyStatus();
   typeWriter();
   setInterval(showSocialProof,8000);
+  startAbandonedCartTimer();
 
   if(window.location.hash){
     var id=window.location.hash.replace('#product-','');
@@ -1236,6 +1391,5 @@ window.onload = function(){
   }
 };
 </script>
-
 </body>
 </html>
