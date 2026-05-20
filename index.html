@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Soso Scent - Premium Perfumes & Skincare</title>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
 <style>
 :root{
   --beige:#f5f1e8;--white:#fff;--gold:#d4af37;--gold-dark:#b8941f;
@@ -12,20 +18,13 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:Georgia,serif;background:var(--beige);color:var(--black)}
-
 @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-15px)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 @keyframes slideIn{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes typing{from{width:0}to{width:100%}}
 
-header{
-  position:fixed;top:0;width:100%;background:rgba(255,255,255,0.95);
-  backdrop-filter:blur(10px);padding:15px 20px;display:flex;
-  justify-content:space-between;align-items:center;z-index:1000;
-  border-bottom:1px solid rgba(212,175,55,0.2)
-}
+header{position:fixed;top:0;width:100%;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;z-index:1000;border-bottom:1px solid rgba(212,175,55,0.2)}
 .logo{font-size:1.6rem;font-weight:700;color:var(--gold-dark);cursor:pointer}
 .nav-links{display:flex;gap:25px;list-style:none}
 .nav-links a{color:var(--black);text-decoration:none;font-weight:500;transition:0.3s}
@@ -36,43 +35,19 @@ header{
 .hamburger.active span:nth-child(2){opacity:0}
 .hamburger.active span:nth-child(3){transform:rotate(-45deg) translateY(-8px)}
 .cart-btn{cursor:pointer;font-size:1.5rem;position:relative}
-.cart-count,.wishlist-count{
-  position:absolute;top:-8px;right:-8px;background:var(--gold);color:#fff;
-  border-radius:50%;width:20px;height:20px;font-size:12px;
-  display:flex;align-items:center;justify-content:center
-}
+.cart-count,.wishlist-count{position:absolute;top:-8px;right:-8px;background:var(--gold);color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;display:flex;align-items:center;justify-content:center}
 
 section{padding:100px 20px;min-height:100vh}
 .container{max-width:1200px;margin:0 auto}
 .section-title{text-align:center;font-size:2.5rem;color:var(--gold-dark);margin-bottom:30px}
-
-.search-bar{
-  max-width:600px;margin:0 auto 40px;display:flex;gap:10px
-}
-.search-bar input{
-  flex:1;padding:15px 20px;border:2px solid var(--gold);border-radius:50px;
-  font-size:1rem;font-family:inherit
-}
+.search-bar{max-width:600px;margin:0 auto 40px;display:flex;gap:10px}
+.search-bar input{flex:1;padding:15px 20px;border:2px solid var(--gold);border-radius:50px;font-size:1rem;font-family:inherit}
 .search-bar input:focus{outline:none;box-shadow:0 0 0 3px rgba(212,175,55,0.2)}
 
-.hero{
-  min-height:100vh;padding-top:80px;
-  background:linear-gradient(-45deg,#f5f1e8,#fff,#f5f1e8,#fff);
-  background-size:400% 400%;
-  animation:gradientShift 15s ease infinite;
-  display:flex;align-items:center;justify-content:center;text-align:center
-}
-.hero h1{
-  font-size:3.5rem;color:var(--gold-dark);margin-bottom:20px;
-  animation:fadeInUp 1s ease, float 4s ease-in-out infinite
-}
+.hero{min-height:100vh;padding-top:80px;background:linear-gradient(-45deg,#f5f1e8,#fff,#f5f1e8,#fff);background-size:400% 400%;animation:gradientShift 15s ease infinite;display:flex;align-items:center;justify-content:center;text-align:center}
+.hero h1{font-size:3.5rem;color:var(--gold-dark);margin-bottom:20px;animation:fadeInUp 1s ease, float 4s ease-in-out infinite}
 .typewriter{font-size:1.4rem;color:var(--gray);min-height:50px;margin-bottom:30px}
-.btn{
-  display:inline-block;padding:16px 45px;
-  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-  color:#fff;text-decoration:none;border-radius:50px;font-weight:600;
-  border:none;cursor:pointer;transition:0.4s
-}
+.btn{display:inline-block;padding:16px 45px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;text-decoration:none;border-radius:50px;font-weight:600;border:none;cursor:pointer;transition:0.4s}
 .btn:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(212,175,55,0.5)}
 .btn-small{padding:8px 15px;font-size:0.9rem;border:none;border-radius:8px;cursor:pointer}
 .btn-edit{background:var(--gold);color:#fff}
@@ -80,10 +55,7 @@ section{padding:100px 20px;min-height:100vh}
 .btn-success{background:var(--green);color:#fff}
 
 .product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:40px}
-.product-card{
-  background:var(--white);border-radius:25px;overflow:hidden;
-  box-shadow:0 15px 35px rgba(0,0,0,0.1);transition:0.5s;position:relative
-}
+.product-card{background:var(--white);border-radius:25px;overflow:hidden;box-shadow:0 15px 35px rgba(0,0,0,0.1);transition:0.5s;position:relative}
 .product-card:hover{transform:translateY(-15px)}
 .product-img{width:100%;height:280px;object-fit:cover;cursor:pointer}
 .product-thumbs{display:flex;gap:8px;padding:10px;overflow-x:auto}
@@ -93,62 +65,33 @@ section{padding:100px 20px;min-height:100vh}
 .product-price{font-size:1.8rem;color:var(--gold-dark);font-weight:700}
 
 .scent-meter{display:flex;gap:5px;margin:10px 0}
-.scent-meter span{
-  flex:1;height:6px;background:#ddd;border-radius:3px
-}
+.scent-meter span{flex:1;height:6px;background:#ddd;border-radius:3px}
 .scent-meter span.active{background:var(--gold)}
 .scent-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.scent-tag{
-  background:var(--beige);padding:4px 10px;border-radius:15px;font-size:0.8rem
-}
+.scent-tag{background:var(--beige);padding:4px 10px;border-radius:15px;font-size:0.8rem}
 
-.wishlist-btn,.share-btn{
-  position:absolute;top:15px;background:rgba(255,255,255,0.9);
-  border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;
-  font-size:1.3rem;display:flex;align-items:center;justify-content:center;
-  transition:0.3s
-}
+.wishlist-btn,.share-btn{position:absolute;top:15px;background:rgba(255,255,255,0.9);border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;transition:0.3s}
 .wishlist-btn{right:15px}
 .share-btn{right:65px}
 .wishlist-btn.active{color:var(--red)}
 .wishlist-btn:hover,.share-btn:hover{transform:scale(1.1)}
 
-.review-section{
-  margin-top:20px;padding-top:20px;border-top:1px solid var(--beige)
-}
-.review-item{
-  background:var(--beige);padding:15px;border-radius:12px;margin-bottom:10px
-}
+.review-section{margin-top:20px;padding-top:20px;border-top:1px solid var(--beige)}
+.review-item{background:var(--beige);padding:15px;border-radius:12px;margin-bottom:10px}
 .review-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .review-img{width:40px;height:40px;border-radius:50%;object-fit:cover}
 .stars{color:var(--gold)}
-.verified-badge{
-  display:inline-flex;align-items:center;gap:5px;background:var(--green);
-  color:#fff;padding:3px 8px;border-radius:12px;font-size:0.75rem;font-weight:600
-}
-.loyalty-badge{
-  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-  color:#fff;padding:5px 12px;border-radius:20px;font-size:0.85rem;font-weight:600
-}
+.verified-badge{display:inline-flex;align-items:center;gap:5px;background:var(--green);color:#fff;padding:3px 8px;border-radius:12px;font-size:0.75rem;font-weight:600}
+.loyalty-badge{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;padding:5px 12px;border-radius:20px;font-size:0.85rem;font-weight:600}
 
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center}
 .modal.active{display:flex}
-.modal-content{
-  background:var(--white);width:90%;max-width:900px;max-height:85vh;
-  border-radius:25px;padding:35px;overflow-y:auto;animation:fadeInUp 0.4s ease
-}
+.modal-content{background:var(--white);width:90%;max-width:900px;max-height:85vh;border-radius:25px;padding:35px;overflow-y:auto;animation:fadeInUp 0.4s ease}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .close-btn{font-size:2rem;cursor:pointer;color:var(--gray)}
-input,textarea,select{
-  width:100%;padding:12px;margin-bottom:15px;border:2px solid var(--beige);
-  border-radius:10px;font-family:inherit;font-size:1rem
-}
+input,textarea,select{width:100%;padding:12px;margin-bottom:15px;border:2px solid var(--beige);border-radius:10px;font-family:inherit;font-size:1rem}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
-.admin-item{
-  display:flex;gap:15px;align-items:center;margin-bottom:15px;
-  padding:15px;background:var(--beige);border-radius:10px
-}
+.admin-item{display:flex;gap:15px;align-items:center;margin-bottom:15px;padding:15px;background:var(--beige);border-radius:10px}
 .admin-item img{width:60px;height:60px;object-fit:cover;border-radius:8px}
 .tab-nav{display:flex;gap:10px;margin-bottom:30px;border-bottom:2px solid var(--beige);overflow-x:auto}
 .tab-btn{padding:12px 25px;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;font-weight:600;white-space:nowrap}
@@ -156,102 +99,48 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .upload-preview{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
 .upload-preview img{width:80px;height:80px;object-fit:cover;border-radius:8px;position:relative}
 .upload-preview div{position:relative}
-.upload-preview button{
-  position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;
-  border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px
-}
-.promo-tag{
-  background:var(--green);color:#fff;padding:10px;border-radius:10px;
-  margin-bottom:15px;text-align:center;font-weight:600
-}
+.upload-preview button{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px}
+.promo-tag{background:var(--green);color:#fff;padding:10px;border-radius:10px;margin-bottom:15px;text-align:center;font-weight:600}
 
-.payment-options{
-  display:flex;flex-direction:column;gap:10px;margin:20px 0
-}
-.payment-option{
-  border:2px solid var(--beige);border-radius:12px;padding:15px;
-  cursor:pointer;transition:0.3s;display:flex;align-items:center;gap:10px
-}
-.payment-option:hover,.payment-option.active{
-  border-color:var(--gold);background:rgba(212,175,55,0.1)
-}
+.payment-options{display:flex;flex-direction:column;gap:10px;margin:20px 0}
+.payment-option{border:2px solid var(--beige);border-radius:12px;padding:15px;cursor:pointer;transition:0.3s;display:flex;align-items:center;gap:10px}
+.payment-option:hover,.payment-option.active{border-color:var(--gold);background:rgba(212,175,55,0.1)}
 .payment-option input{width:auto;margin:0}
 
-.chat-widget{
-  position:fixed;bottom:30px;right:30px;z-index:999
-}
-.chat-btn{
-  width:60px;height:60px;background:var(--green);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 5px 20px rgba(0,0,0,0.3);animation:pulse 2s infinite
-}
+.chat-widget{position:fixed;bottom:30px;right:30px;z-index:999}
+.chat-btn{width:60px;height:60px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 5px 20px rgba(0,0,0,0.3);animation:pulse 2s infinite}
 .chat-btn span{font-size:2rem}
-.chat-box{
-  display:none;position:absolute;bottom:80px;right:0;width:350px;
-  background:var(--white);border-radius:15px;box-shadow:0 10px 40px rgba(0,0,0,0.2);
-  overflow:hidden
-}
+.chat-box{display:none;position:absolute;bottom:80px;right:0;width:350px;background:var(--white);border-radius:15px;box-shadow:0 10px 40px rgba(0,0,0,0.2);overflow:hidden}
 .chat-box.active{display:block}
-.chat-header{
-  background:var(--green);color:#fff;padding:15px;font-weight:600
-}
+.chat-header{background:var(--green);color:#fff;padding:15px;font-weight:600}
 .chat-body{padding:20px;max-height:300px;overflow-y:auto}
 .chat-message{background:var(--beige);padding:10px;border-radius:10px;margin-bottom:10px}
 .chat-options{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.chat-option{
-  background:var(--white);border:1px solid var(--gold);padding:8px;
-  border-radius:8px;cursor:pointer;font-size:0.9rem
-}
+.chat-option{background:var(--white);border:1px solid var(--gold);padding:8px;border-radius:8px;cursor:pointer;font-size:0.9rem}
 .chat-option:hover{background:var(--gold);color:#fff}
 
-.social-proof{
-  position:fixed;bottom:30px;left:30px;background:var(--white);
-  padding:15px 20px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.15);
-  display:none;align-items:center;gap:10px;z-index:999;animation:slideIn 0.5s ease
-}
+.social-proof{position:fixed;bottom:30px;left:30px;background:var(--white);padding:15px 20px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.15);display:none;align-items:center;gap:10px;z-index:999;animation:slideIn 0.5s ease}
 .social-proof.show{display:flex}
 .social-proof img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 
-.sticky-cart-bar{
-  position:fixed;bottom:0;left:0;right:0;background:var(--white);
-  padding:15px 20px;box-shadow:0 -5px 20px rgba(0,0,0,0.1);
-  display:none;gap:15px;align-items:center;z-index:998
-}
+.sticky-cart-bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);padding:15px 20px;box-shadow:0 -5px 20px rgba(0,0,0,0.1);display:none;gap:15px;align-items:center;z-index:998}
 .sticky-cart-bar.show{display:flex}
 .sticky-cart-bar.btn{flex:1}
 
-.ugc-gallery{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:10px;margin-top:20px
-}
+.ugc-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:20px}
 .ugc-gallery img{width:100%;height:150px;object-fit:cover;border-radius:12px;cursor:pointer}
-
 .loading{text-align:center;padding:40px;color:var(--gray);font-size:1.2rem}
-
-/* 404 Page */
-.error-page{
-  text-align:center;padding:100px 20px
-}
+.error-page{text-align:center;padding:100px 20px}
 .error-page h1{font-size:6rem;color:var(--gold-dark)}
 .error-page p{font-size:1.5rem;color:var(--gray);margin:20px 0}
 
-footer{
-  background:var(--black);color:var(--white);padding:40px 20px;text-align:center
-}
+footer{background:var(--black);color:var(--white);padding:40px 20px;text-align:center}
 .footer-content{max-width:1200px;margin:0 auto}
-.harps-btn{
-  display:inline-block;margin-top:15px;padding:12px 30px;
-  background:var(--gold);color:var(--black);text-decoration:none;
-  border-radius:50px;font-weight:600;transition:0.3s
-}
+.harps-btn{display:inline-block;margin-top:15px;padding:12px 30px;background:var(--gold);color:var(--black);text-decoration:none;border-radius:50px;font-weight:600;transition:0.3s}
 .harps-btn:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(212,175,55,0.4)}
 
 @media(max-width:768px){
-.nav-links{
-    position:fixed;top:70px;right:-100%;width:70%;height:100vh;
-    background:var(--white);flex-direction:column;padding:40px;
-    transition:0.4s;box-shadow:-5px 0 20px rgba(0,0,0,0.1)
-  }
+.nav-links{position:fixed;top:70px;right:-100%;width:70%;height:100vh;background:var(--white);flex-direction:column;padding:40px;transition:0.4s;box-shadow:-5px 0 20px rgba(0,0,0,0.1)}
 .nav-links.active{right:0}
 .hamburger{display:flex}
 .hero h1{font-size:2.5rem}
@@ -347,9 +236,7 @@ footer{
   <div class="footer-content">
     <p>© 2026 Soso Scent. All Rights Reserved.</p>
     <p id="loyaltyStatus" style="margin-top:10px"></p>
-    <a href="https://harpstech-ng.github.io/Harps-Tech-Website/" target="_blank" class="harps-btn">
-      Powered by Harps Tech 🚀
-    </a>
+    <a href="https://harpstech-ng.github.io/Harps-Tech-Website/" target="_blank" class="harps-btn">Powered by Harps Tech 🚀</a>
   </div>
 </footer>
 
@@ -366,9 +253,7 @@ footer{
       </div>
     </div>
   </div>
-  <div class="chat-btn" onclick="toggleChat()">
-    <span>💬</span>
-  </div>
+  <div class="chat-btn" onclick="toggleChat()"><span>💬</span></div>
 </div>
 
 <div class="social-proof" id="socialProof">
@@ -379,7 +264,6 @@ footer{
   </div>
 </div>
 
-<!-- 404 Error Page - Hidden by default -->
 <div id="error404" style="display:none">
   <div class="error-page">
     <h1>404</h1>
@@ -390,7 +274,6 @@ footer{
   </div>
 </div>
 
-<!-- All Modals -->
 <div class="modal" id="cartModal">
   <div class="modal-content">
     <div class="modal-header"><h2>Your Cart</h2><span class="close-btn" onclick="toggleCart()">&times;</span></div>
@@ -402,18 +285,9 @@ footer{
     </div>
     <h3 style="margin:20px 0 10px">Select Payment Method</h3>
     <div class="payment-options" id="paymentOptions">
-      <label class="payment-option active">
-        <input type="radio" name="payment" value="cod" checked>
-        <span>💵 Pay on Delivery</span>
-      </label>
-      <label class="payment-option">
-        <input type="radio" name="payment" value="transfer">
-        <span>🏦 Bank Transfer</span>
-      </label>
-      <label class="payment-option">
-        <input type="radio" name="payment" value="card">
-        <span>💳 Pay with Card</span>
-      </label>
+      <label class="payment-option active"><input type="radio" name="payment" value="cod" checked><span>💵 Pay on Delivery</span></label>
+      <label class="payment-option"><input type="radio" name="payment" value="transfer"><span>🏦 Bank Transfer</span></label>
+      <label class="payment-option"><input type="radio" name="payment" value="card"><span>💳 Pay with Card</span></label>
     </div>
     <div id="cartTotal" style="font-size:1.8rem;font-weight:700;color:var(--gold-dark);text-align:right;margin:25px 0">Total: ₦0</div>
     <button class="btn" style="width:100%" onclick="checkoutWhatsApp()">Checkout on WhatsApp</button>
@@ -479,18 +353,13 @@ footer{
         <input type="text" id="prodDesc" placeholder="Description">
         <select id="prodScent">
           <option value="">Select Scent Type</option>
-          <option value="Oud">Oud</option>
-          <option value="Vanilla">Vanilla</option>
-          <option value="Citrus">Citrus</option>
-          <option value="Woody">Woody</option>
-          <option value="Floral">Floral</option>
-          <option value="Musky">Musky</option>
+          <option value="Oud">Oud</option><option value="Vanilla">Vanilla</option>
+          <option value="Citrus">Citrus</option><option value="Woody">Woody</option>
+          <option value="Floral">Floral</option><option value="Musky">Musky</option>
         </select>
         <select id="prodStrength">
-          <option value="1">Strength: Light</option>
-          <option value="2">Strength: Medium</option>
-          <option value="3">Strength: Strong</option>
-          <option value="4">Strength: Very Strong</option>
+          <option value="1">Strength: Light</option><option value="2">Strength: Medium</option>
+          <option value="3">Strength: Strong</option><option value="4">Strength: Very Strong</option>
           <option value="5">Strength: Extreme</option>
         </select>
         <input type="file" id="prodImages" accept="image/*" multiple>
@@ -530,19 +399,36 @@ footer{
 </div>
 
 <script>
-// Data
-var products = JSON.parse(localStorage.getItem('sosoProducts')) || [
-  {id:1,name:"Mystical ASAD Perfume 30ml",price:3000,desc:"Long lasting luxury scent",images:[],stock:10,scent:"Oud",strength:4,reviews:[]}
-];
+// ========== CLOUDINARY CONFIG ==========
+const CLOUDINARY_CLOUD_NAME = "dwc2sthsd";
+const CLOUDINARY_UPLOAD_PRESET = "soso_unsigned";
+
+// ========== FIREBASE CONFIG ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyDzqihiWpAC0jB4dUDJGAY8b1dePQTXBFc",
+  authDomain: "sososcent.firebaseapp.com",
+  projectId: "sososcent",
+  storageBucket: "sososcent.firebasestorage.app",
+  messagingSenderId: "209228647398",
+  appId: "1:209228647398:web:c5370a52b7016103c8e427",
+  measurementId: "G-K4WTLC83K9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+// Removed firebase.storage() - we use Cloudinary now
+
+// ========== DATA ==========
+var products = [];
 var cart = JSON.parse(localStorage.getItem('sosoCart')) || [];
 var wishlist = JSON.parse(localStorage.getItem('sosoWishlist')) || [];
-var orders = JSON.parse(localStorage.getItem('sosoOrders')) || [];
-var promos = JSON.parse(localStorage.getItem('sosoPromos')) || [];
-var reviews = JSON.parse(localStorage.getItem('sosoReviews')) || [];
-var ugcImages = JSON.parse(localStorage.getItem('sosoUGC')) || [];
-var adminPassword = localStorage.getItem('sosoAdminPass') || 'soso123';
-var bizName = localStorage.getItem('sosoBizName') || 'Soso Scent';
-var bizNumber = localStorage.getItem('sosoBizNum') || '2347042468992';
+var orders = [];
+var promos = [];
+var reviews = [];
+var ugcImages = [];
+var adminPassword = 'soso123';
+var bizName = 'Soso Scent';
+var bizNumber = '2347042468992';
 var customerPhone = localStorage.getItem('sosoCustomerPhone') || '';
 var customerName = localStorage.getItem('sosoCustomerName') || '';
 var tapCount = 0;
@@ -551,168 +437,218 @@ var uploadedImages = [];
 var reviewImage = null;
 var reviewVideo = null;
 var appliedPromo = null;
-var filteredProducts = products;
+var filteredProducts = [];
 var selectedPayment = 'cod';
 var currentPage = 1;
 var productsPerPage = 6;
 var loading = false;
 var abandonedCartTimer = null;
 
-// Event Listeners
-document.getElementById('prodImages').addEventListener('change',handleImageUpload);
-document.getElementById('reviewImage').addEventListener('change',handleReviewImage);
-document.getElementById('reviewVideo').addEventListener('change',handleReviewVideo);
-
-document.querySelectorAll('input[name="payment"]').forEach(radio=>{
-  radio.addEventListener('change',e=>{
-    selectedPayment=e.target.value;
-    document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('active'));
-    e.target.closest('.payment-option').classList.add('active');
-  });
-});
-
-// Feature 13: Abandoned Cart Reminder
-function startAbandonedCartTimer(){
+function startAbandonedCartTimer() {
   clearTimeout(abandonedCartTimer);
-  if(cart.length>0 && customerPhone){
-    abandonedCartTimer=setTimeout(()=>{
-      var msg=`Hey ${customerName||'there'}! You left items in your cart at Soso Scent 😏%0A`;
-      cart.forEach(i=>msg+=`➤ ${i.name} x${i.qty}%0A`);
-      msg+=`%0AComplete your order here: ${window.location.origin}`;
-      window.open(`https://wa.me/${customerPhone}?text=${msg}`,'_blank');
-    },3600000); // 1 hour
+  if (cart.length > 0 && customerPhone) {
+    abandonedCartTimer = setTimeout(() => {
+      var msg = `Hey ${customerName||'there'}! You left items in your cart at Soso Scent 😏%0A`;
+      cart.forEach(i => msg += `➤ ${i.name} x${i.qty}%0A`);
+      msg += `%0AComplete your order here: ${window.location.origin}`;
+      window.open(`https://wa.me/${customerPhone}?text=${msg}`, '_blank');
+    }, 3600000); // 1 hour
   }
 }
 
-// Feature 14: Order Status Updates
-function updateOrderStatus(orderId,status){
-  var order=orders.find(o=>o.id==orderId);
-  if(order && order.phone){
-    order.status=status;
-    localStorage.setItem('sosoOrders',JSON.stringify(orders));
-    var msg=`Hi! Your order ${orderId} status: *${status}*%0A`;
-    if(status=='Shipped')msg+='Your package is on the way! 🚚';
-    if(status=='Delivered')msg+='Thank you for shopping with us! 💎';
-    window.open(`https://wa.me/${order.phone}?text=${msg}`,'_blank');
+// ========== FIREBASE SYNC ==========
+async function loadCloudData(){
+  const snap = await db.collection('sosoData').doc('main').get();
+  if(snap.exists){
+    const data = snap.data();
+    products = data.products || [];
+    orders = data.orders || [];
+    promos = data.promos || [];
+    reviews = data.reviews || [];
+    ugcImages = data.ugcImages || [];
+    bizName = data.bizName || 'Soso Scent';
+    bizNumber = data.bizNumber || '2347042468992';
+    adminPassword = data.adminPassword || 'soso123';
+    filteredProducts = products;
+    loadProducts();
+    loadAdminProducts();
+    loadOrders();
+    loadPromos();
+    loadAdminReviews();
+    loadUGC();
+    showPromoBanner();
+    updateLoyaltyStatus();
   }
 }
 
-// Feature 20: Live Chat Bot
-function chatReply(type){
-  var body=document.getElementById('chatBody');
-  var responses={
-    delivery:{msg:"Delivery takes 1-3 business days nationwide. Lagos is 24hrs 🚚"},
-    original:{msg:"100% Original guaranteed! We source directly from distributors ✅"},
-    return:{msg:"7-day return/exchange policy. Item must be unused 🔄"},
-    human:{msg:"Connecting you to WhatsApp now..."}
-  };
-  body.innerHTML+=`<div class="chat-message" style="background:var(--gold);color:#fff">${responses[type].msg}</div>`;
-  if(type=='human'){
-    setTimeout(()=>window.open(`https://wa.me/${bizNumber}`,'_blank'),1000);
-  }
-  body.scrollTop=body.scrollHeight;
-}
-
-// Feature 19: Custom 404
-function show404(){
-  document.querySelectorAll('section').forEach(s=>s.style.display='none');
-  document.getElementById('error404').style.display='block';
-  var trending=products.slice(0,3);
-  var html='';
-  trending.forEach(p=>{
-    html+=`<div class="product-card">
-      <img src="${p.images[0]||'https://via.placeholder.com/400'}" class="product-img">
-      <div class="product-info">
-        <h3>${p.name}</h3>
-        <div class="product-price">₦${p.price.toLocaleString()}</div>
-        <button class="btn" onclick="addToCart(${p.id})">Add to Cart</button>
-      </div>
-    </div>`;
+async function saveAll(){
+  await db.collection('sosoData').doc('main').set({
+    products, orders, promos, reviews, ugcImages, bizName, bizNumber, adminPassword
   });
-  document.getElementById('errorProducts').innerHTML=html;
 }
 
-// Feature 11: Track Order
-function trackOrder(){
-  var id=document.getElementById('trackOrderId').value;
-  var order=orders.find(o=>o.id==id);
-  if(!order){
-    document.getElementById('trackResult').innerHTML='<p style="color:var(--red)">Order not found</p>';
+// ========== CLOUDINARY UPLOAD FUNCTIONS ==========
+async function handleImageUpload(e){
+  var files = e.target.files;
+  if(files.length + uploadedImages.length > 4){
+    alert('Max 4 images per product!');
     return;
   }
-  var status=order.status || 'Processing';
-  var html=`<div style="background:var(--white);padding:25px;border-radius:15px;text-align:left">
-    <h3>Order ${order.id}</h3>
-    <p style="margin:10px 0"><strong>Status:</strong> <span style="color:var(--green);font-weight:600">${status}</span></p>
-    <p><strong>Date:</strong> ${order.date}</p>
-    <p><strong>Total:</strong> ₦${order.total.toLocaleString()}</p>
-    <p><strong>Payment:</strong> ${order.payment}</p>
-    <hr style="margin:15px 0">
-    <h4>Items:</h4>`;
 
-  order.items.forEach(i=>{
-    html+=`<p>• ${i.name} x${i.qty} - ₦${(i.price*i.qty).toLocaleString()}</p>`;
-  });
+  for(var i=0; i<files.length; i++){
+    var file = files[i];
+    var formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', 'soso-scent');
 
-  html+=`</div>`;
-  document.getElementById('trackResult').innerHTML=html;
+    try{
+      var res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      var data = await res.json();
+      uploadedImages.push(data.secure_url);
+      updateImagePreview();
+    }catch(err){
+      alert('Upload failed. Try again.');
+      console.log(err);
+    }
+  }
 }
 
-// Feature 1: WhatsApp Auto-Fill Checkout
+async function handleReviewImage(e){
+  var file = e.target.files[0];
+  if(!file) return;
+
+  var formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  formData.append('folder', 'soso-reviews');
+
+  try{
+    var res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    var data = await res.json();
+    reviewImage = data.secure_url;
+    document.getElementById('reviewPreview').innerHTML =
+      '<div><img src="'+reviewImage+'"><button onclick="removeReviewImage()">x</button></div>';
+  }catch(err){
+    alert('Upload failed. Try again.');
+    console.log(err);
+  }
+}
+
+// The rest of your code stays the same from here down...
+
+function handleReviewVideo(e){
+  var file=e.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(event){
+    reviewVideo=event.target.result;
+  }
+  reader.readAsDataURL(file);
+}
+
+function removeReviewImage(){
+  reviewImage=null;
+  document.getElementById('reviewPreview').innerHTML='';
+  document.getElementById('reviewImage').value='';
+}
+
+function updateImagePreview(){
+  var html='';
+  for(var i=0;i<uploadedImages.length;i++){
+    html+='<div><img src="'+uploadedImages[i]+'"><button onclick="removeImage('+i+')">x</button></div>';
+  }
+  document.getElementById('uploadPreview').innerHTML=html;
+}
+
+function removeImage(index){
+  uploadedImages.splice(index,1);
+  updateImagePreview();
+}
+
+// ========== FIXED: Chat Reply ==========
+function chatReply(type){
+  var body = document.getElementById('chatBody');
+  var responses = {
+    delivery: {msg:"Delivery takes 1-3 business days nationwide. Lagos is 24hrs 🚚"},
+    original: {msg:"100% Original guaranteed! We source directly from distributors ✅"},
+    return: {msg:"7-day return/exchange policy. Item must be unused 🔄"},
+    human: {msg:"Connecting you to WhatsApp now..."}
+  };
+  
+  body.innerHTML += `<div class="chat-message" style="background:var(--gold);color:#fff">${responses[type].msg}</div>`;
+  
+  if(type == 'human'){
+    setTimeout(()=>{
+      var waLink = `https://wa.me/${bizNumber}?text=${encodeURIComponent('Hello Soso Scent, I need help with my order')}`;
+      window.open(waLink, '_blank');
+      toggleChat();
+    }, 600);
+  }
+  body.scrollTop = body.scrollHeight;
+}
+
+// ========== FIXED: WhatsApp Checkout ==========
 function checkoutWhatsApp(){
-  if(cart.length===0){alert('Cart is empty!');return;}
+  if(cart.length === 0){alert('Cart is empty!');return;}
 
-  var subtotal=cart.reduce((sum,item)=>sum+item.price*item.qty,0);
-  var discount=0;
+  var subtotal = cart.reduce(function(sum,item){return sum + item.price * item.qty}, 0);
+  var discount = 0;
   if(appliedPromo){
-    discount=appliedPromo.type=='percent'?subtotal*(appliedPromo.value/100):appliedPromo.value;
+    discount = appliedPromo.type == 'percent' ? subtotal*(appliedPromo.value/100) : appliedPromo.value;
   }
-  var total=subtotal-discount;
+  var total = subtotal - discount;
 
-  var orderId='SS'+Date.now().toString().slice(-6);
-  var orderDate=new Date().toLocaleString('en-NG',{dateStyle:'medium',timeStyle:'short'});
-  var paymentText=selectedPayment=='cod'?'Pay on Delivery':selectedPayment=='transfer'?'Bank Transfer':'Pay with Card';
+  var orderId = 'SS' + Date.now().toString().slice(-6);
+  var orderDate = new Date().toLocaleString('en-NG', {dateStyle:'medium', timeStyle:'short'});
+  var paymentText = selectedPayment=='cod'?'Pay on Delivery':selectedPayment=='transfer'?'Bank Transfer':'Pay with Card';
 
-  var order={id:orderId,date:orderDate,items:cart,total:total,promo:appliedPromo,payment:paymentText,phone:customerPhone,status:'Processing'};
+  var order = {id:orderId,date:orderDate,items:cart,total:total,promo:appliedPromo,payment:paymentText,phone:customerPhone,status:'Processing'};
   orders.unshift(order);
-  localStorage.setItem('sosoOrders',JSON.stringify(orders));
+  saveAll();
 
-  // Auto-fill WhatsApp message
-  var msg=`*✨ ${bizName} Order Receipt ✨*%0A`;
-  msg+='═══════════════%0A';
-  msg+=`*Order ID:* ${orderId}%0A`;
-  msg+=`*Customer:* ${customerName||'Guest'}%0A`;
-  msg+=`*Phone:* ${customerPhone}%0A`;
-  msg+=`*Date:* ${orderDate}%0A`;
-  msg+=`*Payment:* ${paymentText}%0A`;
-  msg+='═══════════════%0A%0A';
-  msg+='*ORDER DETAILS*%0A';
-
-  cart.forEach(i=>{
-    msg+=`➤ ${i.name}%0A`;
-    msg+=`Qty: ${i.qty} x ₦${i.price.toLocaleString()}%0A`;
-    msg+=`Subtotal: ₦${(i.price*i.qty).toLocaleString()}%0A%0A`;
-  });
-
-  msg+='═══════════════%0A';
-  msg+=`*Subtotal:* ₦${subtotal.toLocaleString()}%0A`;
-  if(discount>0){
-    msg+=`*Discount:* -₦${discount.toLocaleString()}%0A`;
+  var msg = `*✨ ${bizName} Order Receipt ✨*%0A`;
+  msg += '═══════════════%0A';
+  msg += `*Order ID:* ${orderId}%0A`;
+  msg += `*Customer:* ${customerName || 'Guest'}%0A`;
+  msg += `*Phone:* ${customerPhone}%0A`;
+  msg += `*Date:* ${orderDate}%0A`;
+  msg += `*Payment:* ${paymentText}%0A`;
+  msg += '═══════════════%0A%0A';
+  msg += '*ORDER DETAILS*%0A';
+  
+  for(var i=0; i<cart.length; i++){
+    var item = cart[i];
+    msg += `➤ ${item.name}%0A`;
+    msg += `Qty: ${item.qty} x ₦${item.price.toLocaleString()}%0A`;
+    msg += `Subtotal: ₦${(item.price * item.qty).toLocaleString()}%0A%0A`;
   }
-  msg+=`*TOTAL: ₦${total.toLocaleString()}*%0A`;
-  msg+='═══════════════%0A%0A';
-  msg+=`_Please confirm my order and delivery details._%0A`;
-  msg+=`_Thank you!_`;
 
-  window.open(`https://wa.me/${bizNumber}?text=${msg}`,'_blank');
+  msg += '═══════════════%0A';
+  msg += `*Subtotal:* ₦${subtotal.toLocaleString()}%0A`;
+  if(discount > 0){
+    msg += `*Discount:* -₦${discount.toLocaleString()}%0A`;
+  }
+  msg += `*TOTAL: ₦${total.toLocaleString()}*%0A`;
+  msg += '═══════════════%0A%0A';
+  msg += `_Please confirm my order and delivery details._%0A`;
+  msg += `_Thank you!_`;
 
-  // Start abandoned cart timer reset
+  var finalLink = `https://wa.me/${bizNumber}?text=${encodeURI(msg)}`;
+  window.open(finalLink, '_blank');
+
   startAbandonedCartTimer();
 
-  setTimeout(()=>{
-    cart=[];appliedPromo=null;selectedPayment='cod';
-    updateCart();toggleCart();loadOrders();
-  },1000);
+  setTimeout(function(){
+    cart = []; appliedPromo = null; selectedPayment = 'cod';
+    updateCart(); toggleCart(); loadOrders();
+  }, 1000);
 }
 
 // Feature 9: Scent Notes + Strength Meter
@@ -725,7 +661,6 @@ function renderScentMeter(strength){
   return html;
 }
 
-// Rest of your existing functions with updates for new features
 function getCustomerTier(){
   var totalSpent=orders.filter(o=>o.phone==customerPhone).reduce((sum,o)=>sum+o.total,0);
   if(totalSpent>=50000)return{level:'Gold',discount:20};
@@ -741,31 +676,30 @@ function updateLoyaltyStatus(){
   }
 }
 
-function handleImageUpload(e){
-  var files=e.target.files;
-  if(files.length+uploadedImages.length>4){
+async function handleImageUpload(e){
+  var files = e.target.files;
+  if(files.length + uploadedImages.length > 4){
     alert('Max 4 images per product!');
     return;
   }
-  for(var i=0;i<files.length;i++){
-    var reader=new FileReader();
-    reader.onload=function(event){
-      uploadedImages.push(event.target.result);
-      updateImagePreview();
-    }
-    reader.readAsDataURL(files[i]);
+  for(var i=0; i<files.length; i++){
+    var file = files[i];
+    var storageRef = storage.ref('products/' + Date.now() + '_' + file.name);
+    var snapshot = await storageRef.put(file);
+    var url = await snapshot.ref.getDownloadURL();
+    uploadedImages.push(url);
+    updateImagePreview();
   }
 }
 
-function handleReviewImage(e){
-  var file=e.target.files[0];
-  if(!file)return;
-  var reader=new FileReader();
-  reader.onload=function(event){
-    reviewImage=event.target.result;
-    document.getElementById('reviewPreview').innerHTML='<div><img src="'+reviewImage+'"><button onclick="removeReviewImage()">x</button></div>';
-  }
-  reader.readAsDataURL(file);
+async function handleReviewImage(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  var storageRef = storage.ref('reviews/' + Date.now() + '_' + file.name);
+  var snapshot = await storageRef.put(file);
+  reviewImage = await snapshot.ref.getDownloadURL();
+  document.getElementById('reviewPreview').innerHTML =
+    '<div><img src="'+reviewImage+'"><button onclick="removeReviewImage()">x</button></div>';
 }
 
 function handleReviewVideo(e){
@@ -906,23 +840,22 @@ function switchTab(tab){
   event.target.classList.add('active');
 }
 
-function saveBizInfo(){
+async function saveBizInfo(){
   bizName=document.getElementById('bizName').value;
   bizNumber=document.getElementById('bizNumber').value;
   var newPass=document.getElementById('newPass').value;
-  localStorage.setItem('sosoBizName',bizName);
-  localStorage.setItem('sosoBizNum',bizNumber);
-  if(newPass){adminPassword=newPass;localStorage.setItem('sosoAdminPass',newPass)}
+  if(newPass){adminPassword=newPass}
+  await saveAll();
   alert('Settings saved!');
 }
 
-function savePromo(){
+async function savePromo(){
   var code=document.getElementById('promoCode').value.toUpperCase();
   var type=document.getElementById('promoType').value;
   var value=parseInt(document.getElementById('promoValue').value);
   if(!code||!value){alert('Fill all fields!');return}
   promos.push({code:code,type:type,value:value});
-  localStorage.setItem('sosoPromos',JSON.stringify(promos));
+  await saveAll();
   loadPromos();
   showPromoBanner();
   document.getElementById('promoCode').value='';
@@ -930,9 +863,9 @@ function savePromo(){
   alert('Promo created!');
 }
 
-function deletePromo(index){
+async function deletePromo(index){
   promos.splice(index,1);
-  localStorage.setItem('sosoPromos',JSON.stringify(promos));
+  await saveAll();
   loadPromos();
   showPromoBanner();
 }
@@ -991,7 +924,7 @@ function closeReview(){
   reviewVideo=null;
 }
 
-function submitReview(){
+async function submitReview(){
   var productId=parseInt(document.getElementById('reviewProductId').value);
   var name=document.getElementById('reviewName').value;
   var phone=document.getElementById('reviewPhone').value;
@@ -1018,10 +951,8 @@ function submitReview(){
   };
 
   reviews.push(review);
-  localStorage.setItem('sosoReviews',JSON.stringify(reviews));
-
   if(reviewImage)ugcImages.push(reviewImage);
-  localStorage.setItem('sosoUGC',JSON.stringify(ugcImages));
+  await saveAll();
 
   closeReview();
   loadProducts();
@@ -1051,17 +982,17 @@ function loadAdminReviews(){
   document.getElementById('adminReviewList').innerHTML=html;
 }
 
-function deleteReview(index){
+async function deleteReview(index){
   if(confirm('Delete this review?')){
     reviews.splice(index,1);
-    localStorage.setItem('sosoReviews',JSON.stringify(reviews));
+    await saveAll();
     loadAdminReviews();
     loadProducts();
     loadUGC();
   }
 }
 
-function saveProduct(){
+async function saveProduct(){
   var id=document.getElementById('editId').value;
   var name=document.getElementById('prodName').value;
   var price=parseInt(document.getElementById('prodPrice').value);
@@ -1091,7 +1022,7 @@ function saveProduct(){
   }else{
     products.push({id:Date.now(),name:name,price:price,stock:stock,desc:desc,scent:scent,strength:strength,images:imgs,reviews:[]});
   }
-  localStorage.setItem('sosoProducts',JSON.stringify(products));
+  await saveAll();
   filteredProducts=products;
   clearForm();loadProducts();loadAdminProducts();
   alert('Product saved!');
@@ -1115,10 +1046,10 @@ function editProduct(id){
   }
 }
 
-function deleteProduct(id){
+async function deleteProduct(id){
   if(confirm('Delete this product?')){
     products=products.filter(function(p){return p.id!=id});
-    localStorage.setItem('sosoProducts',JSON.stringify(products));
+    await saveAll();
     filteredProducts=products;
     loadProducts();loadAdminProducts();
   }
@@ -1350,7 +1281,6 @@ function showSocialProof(){
   setTimeout(()=>document.getElementById('socialProof').classList.remove('show'),4000);
 }
 
-// Infinite Scroll
 window.addEventListener('scroll',()=>{
   if(loading)return;
   if(window.innerHeight+window.scrollY>=document.body.offsetHeight-500){
@@ -1367,7 +1297,6 @@ window.addEventListener('scroll',()=>{
   }
 });
 
-// 404 Handler
 window.addEventListener('error',function(){
   if(window.location.hash&&!document.querySelector(window.location.hash)){
     show404();
@@ -1375,12 +1304,9 @@ window.addEventListener('error',function(){
 });
 
 window.onload=function(){
-  loadProducts();
-  loadUGC();
+  loadCloudData();
   updateCart();
   updateWishlistCount();
-  showPromoBanner();
-  updateLoyaltyStatus();
   typeWriter();
   setInterval(showSocialProof,8000);
   startAbandonedCartTimer();
