@@ -56,11 +56,99 @@ section{padding:100px 20px;min-height:100vh}
 .search-bar input{flex:1;padding:15px 20px;border:2px solid var(--gold);border-radius:50px;font-size:1rem;font-family:inherit}
 .search-bar input:focus{outline:none;box-shadow:0 0 0 3px rgba(212,175,55,0.2)}
 
-.hero{min-height:100vh;padding-top:80px;background:linear-gradient(-45deg,#f5f1e8,#fff,#f5f1e8,#fff);background-size:400% 400%;animation:gradientShift 15s ease infinite;display:flex;align-items:center;justify-content:center;text-align:center}
-.hero h1{font-size:3.5rem;color:var(--gold-dark);margin-bottom:20px;animation:fadeInUp 1s ease, float 4s ease-in-out infinite}
-.typewriter{font-size:1.4rem;color:var(--gray);min-height:50px;margin-bottom:30px}
+/* NEW HERO DESIGN - Video + Glassmorphism + Lifestyle Image */
+.hero{
+  position:relative;
+  min-height:100vh;
+  padding-top:80px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.hero-video{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:1;
+}
+.hero-overlay{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:linear-gradient(135deg, rgba(26,26,26,0.7), rgba(212,175,55,0.3));
+  z-index:2;
+}
+.hero-content{
+  position:relative;
+  z-index:3;
+  max-width:1200px;
+  width:90%;
+  background:rgba(255,255,255,0.12);
+  backdrop-filter:blur(15px);
+  -webkit-backdrop-filter:blur(15px);
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:30px;
+  padding:50px;
+  display:flex;
+  align-items:center;
+  gap:50px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+}
+.hero-text{
+  flex:1;
+  color:#fff;
+}
+.hero-text h1{
+  font-size:3.5rem;
+  color:var(--gold);
+  margin-bottom:15px;
+  animation:fadeInUp 1s ease;
+}
+.hero-sub{
+  font-size:1.2rem;
+  color:rgba(255,255,255,0.9);
+  margin-bottom:25px;
+}
+.typewriter{font-size:1.4rem;color:rgba(255,255,255,0.9);min-height:50px;margin-bottom:30px}
+.hero-buttons{
+  display:flex;
+  gap:15px;
+  margin-bottom:25px;
+}
 .btn{display:inline-block;padding:16px 45px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;text-decoration:none;border-radius:50px;font-weight:600;border:none;cursor:pointer;transition:0.4s}
 .btn:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(212,175,55,0.5)}
+.btn-outline{
+  background:transparent;
+  border:2px solid var(--gold);
+  color:var(--gold);
+}
+.btn-outline:hover{
+  background:var(--gold);
+  color:#fff;
+}
+.hero-badges{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+  font-size:0.95rem;
+  color:rgba(255,255,255,0.9);
+}
+.hero-image{
+  flex:0 0 350px;
+}
+.hero-image img{
+  width:100%;
+  border-radius:20px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.4);
+  animation:float 4s ease-in-out infinite;
+}
+
 .btn-small{padding:8px 15px;font-size:0.9rem;border:none;border-radius:8px;cursor:pointer}
 .btn-edit{background:var(--gold);color:#fff}
 .btn-delete{background:var(--red);color:#fff}
@@ -151,11 +239,28 @@ footer{background:var(--black);color:var(--white);padding:40px 20px;text-align:c
 .harps-btn{display:inline-block;margin-top:15px;padding:12px 30px;background:var(--gold);color:var(--black);text-decoration:none;border-radius:50px;font-weight:600;transition:0.3s}
 .harps-btn:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(212,175,55,0.4)}
 
+@media(max-width:900px){
+.hero-content{
+  flex-direction:column;
+  padding:35px 25px;
+  text-align:center;
+}
+.hero-text h1{
+  font-size:2.5rem;
+}
+.hero-image{
+  flex:0 0 250px;
+}
+.hero-buttons{
+  justify-content:center;
+}
+.hero-badges{
+  justify-content:center;
+}
 @media(max-width:768px){
 .nav-links{position:fixed;top:70px;right:-100%;width:70%;height:100vh;background:var(--white);flex-direction:column;padding:40px;transition:0.4s;box-shadow:-5px 0 20px rgba(0,0,0,0.1)}
 .nav-links.active{right:0}
 .hamburger{display:flex}
-.hero h1{font-size:2.5rem}
 .chat-widget{bottom:20px;right:20px}
 .social-proof{left:20px;right:20px;bottom:100px}
 .sticky-cart-bar{padding-bottom:25px}
@@ -193,11 +298,40 @@ footer{background:var(--black);color:var(--white);padding:40px 20px;text-align:c
   </div>
 </header>
 
+<!-- NEW HERO SECTION -->
 <section class="hero" id="home">
-  <div>
-    <h1>Soso Scent</h1>
-    <div class="typewriter" id="typewriter"></div>
-    <a href="#products" class="btn">Shop Now</a>
+  <!-- Video Background -->
+  <video autoplay muted loop playsinline class="hero-video">
+    <source src="https://videos.pexels.com/video-files/3196060/3196060-uhd_2560_1440_25fps.mp4" type="video/mp4">
+  </video>
+  
+  <!-- Dark overlay -->
+  <div class="hero-overlay"></div>
+
+  <!-- Content Card -->
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1>Soso Scent ✨</h1>
+      <div class="typewriter" id="typewriter"></div>
+      <p class="hero-sub">100% Original Perfumes & Skincare for the bold</p>
+      
+      <div class="hero-buttons">
+        <a href="#products" class="btn">Shop Now</a>
+        <a href="#ugc" class="btn btn-outline">See Reviews</a>
+      </div>
+
+      <!-- Trust badges -->
+      <div class="hero-badges">
+        <div>✅ 100% Original</div>
+        <div>🚚 Lagos 24hr Delivery</div>
+        <div>💎 Luxury Quality</div>
+      </div>
+    </div>
+
+    <!-- Lifestyle Image -->
+    <div class="hero-image">
+      <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=800" alt="Luxury Perfume">
+    </div>
   </div>
 </section>
 
@@ -446,6 +580,7 @@ var products = [];
 var cart = JSON.parse(localStorage.getItem('sosoCart')) || [];
 var wishlist = JSON.parse(localStorage.getItem('sosoWishlist')) || [];
 var orders = [];
+
 var promos = [];
 var reviews = [];
 var ugcImages = [];
@@ -1161,7 +1296,7 @@ function loadProducts(){
   for(var i=0;i<toShow.length;i++){
     var p=toShow[i];
     var mainImg=(p.images&&p.images.length>0)
-   ? p.images[0]
+  ? p.images[0]
       : 'https://via.placeholder.com/400x400/f5f1e8/d4af37?text=No+Image';
 
     var thumbs='';
@@ -1285,8 +1420,7 @@ function updateCart(){
 
 function toggleCart(){
   document.getElementById('cartModal').classList.toggle('active');
-  document.getElementById('promoMessage').textContent='';
-  document.getElementById('promoInput').value='';
+  document.getElementById('promoMessage').textContent=''; document.getElementById('promoInput').value='';
   appliedPromo=null;
   updateCart();
 }
