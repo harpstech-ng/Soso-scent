@@ -98,14 +98,16 @@ section{padding:100px 20px;min-height:100vh}
 .product-info{padding:25px}
 .product-price{font-size:1.8rem;color:var(--gold-dark);font-weight:700}
 
-.wishlist-btn{
-  position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);
+.wishlist-btn,.share-btn{
+  position:absolute;top:15px;background:rgba(255,255,255,0.9);
   border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;
   font-size:1.3rem;display:flex;align-items:center;justify-content:center;
   transition:0.3s
 }
+.wishlist-btn{right:15px}
+.share-btn{right:65px}
 .wishlist-btn.active{color:var(--red)}
-.wishlist-btn:hover{transform:scale(1.1)}
+.wishlist-btn:hover,.share-btn:hover{transform:scale(1.1)}
 
 .review-section{
   margin-top:20px;padding-top:20px;border-top:1px solid var(--beige)
@@ -116,6 +118,14 @@ section{padding:100px 20px;min-height:100vh}
 .review-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .review-img{width:40px;height:40px;border-radius:50%;object-fit:cover}
 .stars{color:var(--gold)}
+.verified-badge{
+  display:inline-flex;align-items:center;gap:5px;background:var(--green);
+  color:#fff;padding:3px 8px;border-radius:12px;font-size:0.75rem;font-weight:600
+}
+.loyalty-badge{
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:#fff;padding:5px 12px;border-radius:20px;font-size:0.85rem;font-weight:600
+}
 
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
   background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center}
@@ -192,6 +202,25 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .social-proof.show{display:flex}
 .social-proof img{width:40px;height:40px;border-radius:8px;object-fit:cover}
 
+/* NEW: Sticky cart bar */
+.sticky-cart-bar{
+  position:fixed;bottom:0;left:0;right:0;background:var(--white);
+  padding:15px 20px;box-shadow:0 -5px 20px rgba(0,0,0,0.1);
+  display:none;gap:15px;align-items:center;z-index:998
+}
+.sticky-cart-bar.show{display:flex}
+.sticky-cart-bar.btn{flex:1}
+
+/* NEW: UGC Gallery */
+.ugc-gallery{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px;margin-top:20px
+}
+.ugc-gallery img{width:100%;height:150px;object-fit:cover;border-radius:12px;cursor:pointer}
+
+/* NEW: Loading indicator for infinite scroll */
+.loading{text-align:center;padding:40px;color:var(--gray);font-size:1.2rem}
+
 footer{
   background:var(--black);color:var(--white);padding:40px 20px;text-align:center
 }
@@ -214,6 +243,7 @@ footer{
 .hero h1{font-size:2.5rem}
 .chat-widget{bottom:20px;right:20px}
 .social-proof{left:20px;right:20px;bottom:100px}
+.sticky-cart-bar{padding-bottom:25px}
 </style>
 </head>
 <body>
@@ -223,6 +253,7 @@ footer{
   <ul class="nav-links" id="navLinks">
     <li><a href="#home" onclick="closeMenu()">Home</a></li>
     <li><a href="#products" onclick="closeMenu()">Products</a></li>
+    <li><a href="#ugc" onclick="closeMenu()">Gallery</a></li>
     <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
   </ul>
   <div style="display:flex;gap:15px;align-items:center">
@@ -252,6 +283,16 @@ footer{
 
     <div id="promoBanner"></div>
     <div class="product-grid" id="productGrid"></div>
+    <div class="loading" id="loading" style="display:none">Loading more products...</div>
+  </div>
+</section>
+
+<!-- NEW: UGC Gallery Section -->
+<section id="ugc" style="background:var(--beige)">
+  <div class="container">
+    <h2 class="section-title">Customer Gallery 📸</h2>
+    <p style="text-align:center;margin-bottom:20px">Tag us @sososcent to get featured</p>
+    <div class="ugc-gallery" id="ugcGallery"></div>
   </div>
 </section>
 
@@ -270,9 +311,19 @@ footer{
   </div>
 </section>
 
+<!-- NEW: Sticky Cart Bar -->
+<div class="sticky-cart-bar" id="stickyCartBar">
+  <div>
+    <div id="stickyProductName" style="font-weight:600"></div>
+    <div id="stickyProductPrice" style="color:var(--gold-dark);font-weight:700"></div>
+  </div>
+  <button class="btn" id="stickyAddBtn">Add to Cart</button>
+</div>
+
 <footer>
   <div class="footer-content">
     <p>© 2026 Soso Scent. All Rights Reserved.</p>
+    <p id="loyaltyStatus" style="margin-top:10px"></p>
     <a href="https://harpstech-ng.github.io/Harps-Tech-Website/" target="_blank" class="harps-btn">
       Powered by Harps Tech 🚀
     </a>
@@ -353,6 +404,7 @@ footer{
     <div class="modal-header"><h2>Leave a Review</h2><span class="close-btn" onclick="closeReview()">&times;</span></div>
     <input type="hidden" id="reviewProductId">
     <input type="text" id="reviewName" placeholder="Your Name">
+    <input type="text" id="reviewPhone" placeholder="Phone Number used for order">
     <select id="reviewRating">
       <option value="5">★★★ 5 Stars</option>
       <option value="4">★★ 4 Stars</option>
@@ -362,6 +414,7 @@ footer{
     </select>
     <textarea id="reviewText" placeholder="Write your review..." rows="4"></textarea>
     <input type="file" id="reviewImage" accept="image/*">
+    <input type="file" id="reviewVideo" accept="video/*">
     <div class="upload-preview" id="reviewPreview"></div>
     <button class="btn" style="width:100%" onclick="submitReview()">Submit Review</button>
   </div>
@@ -388,6 +441,7 @@ footer{
         <input type="hidden" id="editId">
         <input type="text" id="prodName" placeholder="Product Name">
         <input type="number" id="prodPrice" placeholder="Price (₦)">
+        <input type="number" id="prodStock" placeholder="Stock Quantity">
         <input type="text" id="prodDesc" placeholder="Description">
         <input type="file" id="prodImages" accept="image/*" multiple>
         <div class="upload-preview" id="uploadPreview"></div>
@@ -431,26 +485,33 @@ footer{
 
 <script>
 var products = JSON.parse(localStorage.getItem('sosoProducts')) || [
-  {id:1,name:"Mystical ASAD Perfume 30ml",price:3000,desc:"Long lasting luxury scent",images:[],reviews:[]}
+  {id:1,name:"Mystical ASAD Perfume 30ml",price:3000,desc:"Long lasting luxury scent",images:[],stock:10,reviews:[]}
 ];
 var cart = JSON.parse(localStorage.getItem('sosoCart')) || [];
 var wishlist = JSON.parse(localStorage.getItem('sosoWishlist')) || [];
 var orders = JSON.parse(localStorage.getItem('sosoOrders')) || [];
 var promos = JSON.parse(localStorage.getItem('sosoPromos')) || [];
 var reviews = JSON.parse(localStorage.getItem('sosoReviews')) || [];
+var ugcImages = JSON.parse(localStorage.getItem('sosoUGC')) || [];
 var adminPassword = localStorage.getItem('sosoAdminPass') || 'soso123';
 var bizName = localStorage.getItem('sosoBizName') || 'Soso Scent';
 var bizNumber = localStorage.getItem('sosoBizNum') || '2347042468992';
+var customerPhone = localStorage.getItem('sosoCustomerPhone') || '';
 var tapCount = 0;
 var tapTimer = null;
 var uploadedImages = [];
 var reviewImage = null;
+var reviewVideo = null;
 var appliedPromo = null;
 var filteredProducts = products;
 var selectedPayment = 'cod';
+var currentPage = 1;
+var productsPerPage = 6;
+var loading = false;
 
 document.getElementById('prodImages').addEventListener('change',handleImageUpload);
 document.getElementById('reviewImage').addEventListener('change',handleReviewImage);
+document.getElementById('reviewVideo').addEventListener('change',handleReviewVideo);
 
 document.querySelectorAll('input[name="payment"]').forEach(radio=>{
   radio.addEventListener('change',e=>{
@@ -459,6 +520,21 @@ document.querySelectorAll('input[name="payment"]').forEach(radio=>{
     e.target.closest('.payment-option').classList.add('active');
   });
 });
+
+function getCustomerTier(){
+  var totalSpent = orders.filter(o=>o.phone==customerPhone).reduce((sum,o)=>sum+o.total,0);
+  if(totalSpent>=50000)return{level:'Gold',discount:20};
+  if(totalSpent>=20000)return{level:'Silver',discount:15};
+  if(totalSpent>=5000)return{level:'Bronze',discount:10};
+  return{level:'None',discount:0};
+}
+
+function updateLoyaltyStatus(){
+  var tier=getCustomerTier();
+  if(tier.level!='None'){
+    document.getElementById('loyaltyStatus').innerHTML=`<span class="loyalty-badge">${tier.level} Member - ${tier.discount}% OFF</span>`;
+  }
+}
 
 function handleImageUpload(e){
   var files=e.target.files;
@@ -483,6 +559,16 @@ function handleReviewImage(e){
   reader.onload=function(event){
     reviewImage=event.target.result;
     document.getElementById('reviewPreview').innerHTML='<div><img src="'+reviewImage+'"><button onclick="removeReviewImage()">x</button></div>';
+  }
+  reader.readAsDataURL(file);
+}
+
+function handleReviewVideo(e){
+  var file=e.target.files[0];
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(event){
+    reviewVideo=event.target.result;
   }
   reader.readAsDataURL(file);
 }
@@ -521,6 +607,26 @@ function toggleChat(){
 
 function openWhatsAppChat(){
   window.location.href='https://wa.me/'+bizNumber+'?text=Hi! I need help with Soso Scent products.';
+}
+
+function shareProduct(id){
+  var product=products.find(p=>p.id==id);
+  var link=window.location.origin+window.location.pathname+'#product-'+id;
+  var msg=`Check out this product: ${product.name} - ₦${product.price.toLocaleString()}%0A${link}`;
+  window.open(`https://wa.me/?text=${msg}`,'_blank');
+}
+
+function showStickyCart(id){
+  var product=products.find(p=>p.id==id);
+  document.getElementById('stickyProductName').textContent=product.name;
+  document.getElementById('stickyProductPrice').textContent='₦'+product.price.toLocaleString();
+  document.getElementById('stickyAddBtn').onclick=()=>{addToCart(id);hideStickyCart()};
+  document.getElementById('stickyCartBar').classList.add('show');
+  setTimeout(hideStickyCart,5000);
+}
+
+function hideStickyCart(){
+  document.getElementById('stickyCartBar').classList.remove('show');
 }
 
 function toggleWishlist(){
@@ -639,7 +745,7 @@ function loadPromos(){
       '<button class="btn-small btn-delete" onclick="deletePromo('+i+')">Delete</button>' +
     '</div>';
   }
-  document.getElementById('promoList').innerHTML=html;
+  document.getElementById('promoList').innerHTML=html || '<p>No promos yet</p>';
 }
 
 function showPromoBanner(){
@@ -662,6 +768,7 @@ function applyPromo(){
   if(promo){
     appliedPromo=promo;
     document.getElementById('promoMessage').textContent='Promo applied! '+promo.value+(promo.type=='percent'?'%':'₦')+' off';
+    document.getElementById('promoMessage').style.color='var(--green)';
     updateCart();
   }else{
     document.getElementById('promoMessage').textContent='Invalid promo code';
@@ -677,32 +784,45 @@ function openReviewModal(productId){
 function closeReview(){
   document.getElementById('reviewModal').classList.remove('active');
   document.getElementById('reviewName').value='';
+  document.getElementById('reviewPhone').value='';
   document.getElementById('reviewText').value='';
   removeReviewImage();
+  reviewVideo=null;
 }
 
 function submitReview(){
   var productId=parseInt(document.getElementById('reviewProductId').value);
   var name=document.getElementById('reviewName').value;
+  var phone=document.getElementById('reviewPhone').value;
   var rating=document.getElementById('reviewRating').value;
   var text=document.getElementById('reviewText').value;
 
-  if(!name||!text){alert('Fill all fields!');return}
+  if(!name||!text||!phone){alert('Fill all fields!');return}
+
+  customerPhone=phone;
+  localStorage.setItem('sosoCustomerPhone',phone);
 
   var review={
     id:Date.now(),
     productId:productId,
     name:name,
+    phone:phone,
     rating:parseInt(rating),
     text:text,
     image:reviewImage,
+    video:reviewVideo,
     date:new Date().toLocaleDateString()
   };
 
   reviews.push(review);
   localStorage.setItem('sosoReviews',JSON.stringify(reviews));
+
+  if(reviewImage)ugcImages.push(reviewImage);
+  localStorage.setItem('sosoUGC',JSON.stringify(ugcImages));
+
   closeReview();
   loadProducts();
+  loadUGC();
   loadAdminReviews();
   alert('Review submitted! Thank you ❤️');
 }
@@ -734,6 +854,7 @@ function deleteReview(index){
     localStorage.setItem('sosoReviews',JSON.stringify(reviews));
     loadAdminReviews();
     loadProducts();
+    loadUGC();
   }
 }
 
@@ -741,6 +862,7 @@ function saveProduct(){
   var id=document.getElementById('editId').value;
   var name=document.getElementById('prodName').value;
   var price=parseInt(document.getElementById('prodPrice').value);
+  var stock=parseInt(document.getElementById('prodStock').value)||0;
   var desc=document.getElementById('prodDesc').value;
 
   if(!name||!price||!desc){alert('Fill all fields!');return}
@@ -753,13 +875,14 @@ function saveProduct(){
       if(products[i].id==id){
         products[i].name=name;
         products[i].price=price;
+        products[i].stock=stock;
         products[i].desc=desc;
         products[i].images=imgs;
         products[i].reviews=existingReviews;
       }
     }
   }else{
-    products.push({id:Date.now(),name:name,price:price,desc:desc,images:imgs,reviews:[]});
+    products.push({id:Date.now(),name:name,price:price,stock:stock,desc:desc,images:imgs,reviews:[]});
   }
   localStorage.setItem('sosoProducts',JSON.stringify(products));
   filteredProducts=products;
@@ -773,10 +896,12 @@ function editProduct(id){
       document.getElementById('editId').value=products[i].id;
       document.getElementById('prodName').value=products[i].name;
       document.getElementById('prodPrice').value=products[i].price;
+      document.getElementById('prodStock').value=products[i].stock||0;
       document.getElementById('prodDesc').value=products[i].desc;
       uploadedImages=products[i].images||[];
       updateImagePreview();
       switchTab('products');
+      window.scrollTo({top:0,behavior:'smooth'});
     }
   }
 }
@@ -794,6 +919,7 @@ function clearForm(){
   document.getElementById('editId').value='';
   document.getElementById('prodName').value='';
   document.getElementById('prodPrice').value='';
+  document.getElementById('prodStock').value='';
   document.getElementById('prodDesc').value='';
   uploadedImages=[];
   updateImagePreview();
@@ -828,6 +954,7 @@ function loadOrders(){
         '<strong>Order #'+o.id+'</strong><br>' +
         '<small>'+o.date+'</small><br>' +
         '<p>Total: ₦'+o.total.toLocaleString()+'</p>' +
+        '<small>Phone: '+o.phone+'</small><br>' +
         '<small>Payment: '+o.payment+'</small>' +
       '</div>';
     }
@@ -840,50 +967,61 @@ function searchProducts(){
   filteredProducts=products.filter(function(p){
     return p.name.toLowerCase().indexOf(query)>-1||p.desc.toLowerCase().indexOf(query)>-1;
   });
+  currentPage=1;
   loadProducts();
 }
 
 function loadProducts(){
+  var start=0;
+  var end=currentPage*productsPerPage;
+  var toShow=filteredProducts.slice(start,end);
+
   var html = '';
-  for(var i=0; i<filteredProducts.length; i++){
-    var p = filteredProducts[i];
+  for(var i=0; i<toShow.length; i++){
+    var p = toShow[i];
     var mainImg=p.images&&p.images.length>0?p.images[0]:'https://via.placeholder.com/400x400/f5f1e8/d4af37?text=Product';
     var thumbs='';
     if(p.images&&p.images.length>1){
       for(var j=0;j<p.images.length;j++){
-        thumbs+='<img src="'+p.images[j]+'" onclick="switchImage('+i+','+j+')" id="thumb-'+i+'-'+j+'" class="'+(j==0?'active':'')+'">';
+        thumbs+='<img src="'+p.images[j]+'" onclick="switchImage('+p.id+','+j+')" id="thumb-'+p.id+'-'+j+'" class="'+(j==0?'active':'')+'">';
       }
     }
 
     var isWishlisted = wishlist.find(w=>w.id==p.id);
     var productReviews=reviews.filter(r=>r.productId==p.id);
+    var avgRating=productReviews.length>0?productReviews.reduce((a,b)=>a+b.rating,0)/productReviews.length:0;
     var reviewHtml='';
     if(productReviews.length>0){
       reviewHtml='<div class="review-section"><h4>Customer Reviews ('+productReviews.length+')</h4>';
-      for(var j=0;j<Math.min(3,productReviews.length);j++){
+      for(var j=0;j<Math.min(2,productReviews.length);j++){
         var r=productReviews[j];
+        var isVerified=orders.some(o=>o.phone==r.phone&&o.items.some(i=>i.id==p.id));
         var stars='';
         for(var k=0;k<r.rating;k++) stars+='★';
         reviewHtml+='<div class="review-item">' +
           '<div class="review-header">' +
             (r.image?'<img src="'+r.image+'" class="review-img">':'') +
-            '<div><strong>'+r.name+'</strong><div class="stars">'+stars+'</div></div>' +
+            '<div><strong>'+r.name+'</strong> '+ (isVerified?'<span class="verified-badge">✓ Verified</span>':'') +
+            '<div class="stars">'+stars+'</div></div>' +
           '</div>' +
           '<p>'+r.text+'</p>' +
+          (r.video?'<video src="'+r.video+'" controls style="width:100%;max-height:200px;border-radius:8px;margin-top:8px"></video>':'') +
         '</div>';
       }
       reviewHtml+='</div>';
     }
 
-    html += '<div class="product-card">' +
+    html += '<div class="product-card" id="product-'+p.id+'">' +
+      '<button class="share-btn" onclick="shareProduct('+p.id+')">📤</button>'+
       '<button class="wishlist-btn '+(isWishlisted?'active':'')+'" onclick="addToWishlist('+p.id+')">❤️</button>'+
-      '<img src="'+mainImg+'" class="product-img" id="mainImg-'+i+'">' +
+      '<img src="'+mainImg+'" class="product-img" id="mainImg-'+p.id+'">' +
       '<div class="product-thumbs">'+thumbs+'</div>'+
       '<div class="product-info">' +
         '<div style="font-size:1.3rem;font-weight:600;margin-bottom:10px">' + p.name + '</div>' +
         '<p style="color:var(--gray);margin-bottom:15px">' + p.desc + '</p>' +
         '<div class="product-price">₦' + p.price.toLocaleString() + '</div>' +
-        '<button class="btn" style="width:100%;margin-top:15px" onclick="addToCart(' + p.id + ')">Add to Cart</button>' +
+        (avgRating>0?'<div>⭐ '+avgRating.toFixed(1)+' ('+productReviews.length+' reviews)</div>':'') +
+        '<button class="btn" style="width:100%;margin-top:15px" onclick="showStickyCart('+p.id+')">Add to Cart</button>' +
         '<button class="btn-small btn-edit" style="width:100%;margin-top:10px" onclick="openReviewModal('+p.id+')">Write Review</button>' +
         reviewHtml +
       '</div>' +
@@ -892,12 +1030,20 @@ function loadProducts(){
   document.getElementById('productGrid').innerHTML = html||'<p style="text-align:center">No products found</p>';
 }
 
-function switchImage(prodIndex,imgIndex){
-  var p=filteredProducts[prodIndex];
-  document.getElementById('mainImg-'+prodIndex).src=p.images[imgIndex];
-  var thumbs=document.querySelectorAll('#thumb-'+prodIndex+'-*');
+function loadUGC(){
+  var html='';
+  ugcImages.forEach(img=>{
+    html+=`<img src="${img}" onclick="window.open('${img}','_blank')">`;
+  });
+  document.getElementById('ugcGallery').innerHTML=html || '<p style="text-align:center">No customer photos yet</p>';
+}
+
+function switchImage(prodId,imgIndex){
+  var p=products.find(x=>x.id==prodId);
+  document.getElementById('mainImg-'+prodId).src=p.images[imgIndex];
+  var thumbs=document.querySelectorAll('#thumb-'+prodId+'-*');
   for(var i=0;i<thumbs.length;i++){thumbs[i].classList.remove('active')}
-  document.getElementById('thumb-'+prodIndex+'-'+imgIndex).classList.add('active');
+  document.getElementById('thumb-'+prodId+'-'+imgIndex).classList.add('active');
 }
 
 function addToCart(id){
@@ -980,11 +1126,10 @@ function checkout(){
   var orderDate = new Date().toLocaleString('en-NG', {dateStyle:'medium', timeStyle:'short'});
   var paymentText = selectedPayment=='cod'?'Pay on Delivery':selectedPayment=='transfer'?'Bank Transfer':'Pay with Card';
 
-  var order={id:orderId,date:orderDate,items:cart,total:total,promo:appliedPromo,payment:paymentText};
+  var order={id:orderId,date:orderDate,items:cart,total:total,promo:appliedPromo,payment:paymentText,phone:customerPhone};
   orders.unshift(order);
   localStorage.setItem('sosoOrders',JSON.stringify(orders));
 
-  // Build receipt message
   var msg = '*✨ '+bizName+' Official Receipt ✨*%0A';
   msg += '═══════════════%0A';
   msg += '*Order ID:* ' + orderId + '%0A';
@@ -1019,7 +1164,6 @@ function checkout(){
   msg += '_Delivery takes 1-3 business days._%0A%0A';
   msg += '💎 *Luxury Scents, Affordable Prices* 💎';
 
-  // This is the fix - use window.open
   window.open('https://wa.me/'+bizNumber+'?text=' + msg, '_blank');
 
   setTimeout(function(){
@@ -1059,13 +1203,37 @@ function showSocialProof(){
   setTimeout(()=>document.getElementById('socialProof').classList.remove('show'),4000);
 }
 
+// Infinite Scroll
+window.addEventListener('scroll',()=>{
+  if(loading)return;
+  if(window.innerHeight+window.scrollY>=document.body.offsetHeight-500){
+    if(currentPage*productsPerPage<filteredProducts.length){
+      loading=true;
+      document.getElementById('loading').style.display='block';
+      setTimeout(()=>{
+        currentPage++;
+        loadProducts();
+        loading=false;
+        document.getElementById('loading').style.display='none';
+      },800);
+    }
+  }
+});
+
 window.onload = function(){
   loadProducts();
+  loadUGC();
   updateCart();
   updateWishlistCount();
   showPromoBanner();
+  updateLoyaltyStatus();
   typeWriter();
   setInterval(showSocialProof,8000);
+
+  if(window.location.hash){
+    var id=window.location.hash.replace('#product-','');
+    setTimeout(()=>document.getElementById('product-'+id)?.scrollIntoView({behavior:'smooth'}),500);
+  }
 };
 </script>
 
