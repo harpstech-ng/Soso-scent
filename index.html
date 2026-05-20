@@ -8,6 +8,8 @@
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<!-- PDF Generator -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- REMOVED firebase-storage - we use Cloudinary now -->
 
 <style>
@@ -23,8 +25,19 @@ body{font-family:Georgia,serif;background:var(--beige);color:var(--black)}
 @keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-15px)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 @keyframes slideIn{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes floatBottle{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-15px) rotate(5deg)}}
 
-header{position:fixed;top:0;width:100%;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;z-index:1000;border-bottom:1px solid rgba(212,175,55,0.2)}
+/* UPDATED HEADER WITH BUSY DESIGN */
+header{position:fixed;top:0;width:100%;height:80px;z-index:1000;overflow:hidden}
+.header-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(212,175,55,0.2)}
+.header-content{position:relative;display:flex;justify-content:space-between;align-items:center;padding:15px 20px;height:100%}
+.floating-bottles{position:absolute;width:100%;height:100%;overflow:hidden;opacity:0.12}
+.bottle{position:absolute;width:55px;height:55px;object-fit:contain;animation:floatBottle 15s infinite ease-in-out}
+.b1{left:8%;top:5px;animation-delay:0s}
+.b2{left:35%;top:-8px;animation-delay:4s}
+.b3{left:60%;top:10px;animation-delay:8s}
+.b4{left:85%;top:0px;animation-delay:12s}
+
 .logo{font-size:1.6rem;font-weight:700;color:var(--gold-dark);cursor:pointer}
 .nav-links{display:flex;gap:25px;list-style:none}
 .nav-links a{color:var(--black);text-decoration:none;font-weight:500;transition:0.3s}
@@ -148,24 +161,36 @@ footer{background:var(--black);color:var(--white);padding:40px 20px;text-align:c
 .social-proof{left:20px;right:20px;bottom:100px}
 .sticky-cart-bar{padding-bottom:25px}
 .chat-box{width:90vw;right:5vw}
+.bottle{width:40px;height:40px}
 </style>
 </head>
 <body>
 
+<!-- UPDATED HEADER -->
 <header>
-  <div class="logo" id="logo">Soso Scent ✨</div>
-  <ul class="nav-links" id="navLinks">
-    <li><a href="#home" onclick="closeMenu()">Home</a></li>
-    <li><a href="#products" onclick="closeMenu()">Products</a></li>
-    <li><a href="#track" onclick="closeMenu()">Track Order</a></li>
-    <li><a href="#ugc" onclick="closeMenu()">Gallery</a></li>
-    <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
-  </ul>
-  <div style="display:flex;gap:15px;align-items:center">
-    <div class="cart-btn" onclick="toggleWishlist()">❤️<span class="wishlist-count" id="wishlistCount">0</span></div>
-    <div class="cart-btn" onclick="toggleCart()">🛒<span class="cart-count" id="cartCount">0</span></div>
-    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
-      <span></span><span></span><span></span>
+  <div class="header-bg">
+    <div class="floating-bottles">
+      <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?w=200" class="bottle b1">
+      <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200" class="bottle b2">
+      <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=200" class="bottle b3">
+      <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=200" class="bottle b4">
+    </div>
+  </div>
+  <div class="header-content">
+    <div class="logo" id="logo">Soso Scent ✨</div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home" onclick="closeMenu()">Home</a></li>
+      <li><a href="#products" onclick="closeMenu()">Products</a></li>
+      <li><a href="#track" onclick="closeMenu()">Track Order</a></li>
+      <li><a href="#ugc" onclick="closeMenu()">Gallery</a></li>
+      <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
+    </ul>
+    <div style="display:flex;gap:15px;align-items:center">
+      <div class="cart-btn" onclick="toggleWishlist()">❤️<span class="wishlist-count" id="wishlistCount">0</span></div>
+      <div class="cart-btn" onclick="toggleCart()">🛒<span class="cart-count" id="cartCount">0</span></div>
+      <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </div>
     </div>
   </div>
 </header>
@@ -298,6 +323,8 @@ footer{background:var(--black);color:var(--white);padding:40px 20px;text-align:c
   <div class="modal-content">
     <div class="modal-header"><h2>Your Wishlist ❤️</h2><span class="close-btn" onclick="toggleWishlist()">&times;</span></div>
     <div id="wishlistItems"></div>
+    <!-- #19 ADDED: Share wishlist button -->
+    <button class="btn" style="width:100%;margin-top:20px;background:var(--green)" onclick="shareWishlist()">📤 Share Wishlist on WhatsApp</button>
   </div>
 </div>
 
@@ -522,9 +549,7 @@ async function handleImageUpload(e){
 
 async function handleReviewImage(e){
   var file = e.target.files[0];
-  if(!file) return;
-
-  var formData = new FormData();
+  if(!file) return;var formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
   formData.append('folder', 'soso-reviews');
@@ -595,54 +620,112 @@ function chatReply(type){
   body.scrollTop = body.scrollHeight;
 }
 
-// ========== FIXED: WhatsApp Checkout ==========
+// ========== #28 INVOICE PDF GENERATOR ==========
+function generateInvoice(order){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(22);
+  doc.setTextColor(212,175,55);
+  doc.text(bizName, 105, 20, {align:'center'});
+
+  doc.setFontSize(12);
+  doc.setTextColor(0,0,0);
+  doc.text('INVOICE', 105, 30, {align:'center'});
+  doc.text(`Order ID: ${order.id}`, 20, 45);
+  doc.text(`Date: ${order.date}`, 20, 52);
+  doc.text(`Customer: ${customerName || 'Guest'}`, 20, 59);
+  doc.text(`Phone: ${order.phone}`, 20, 66);
+  doc.text(`Payment: ${order.payment}`, 20, 73);
+
+  let y = 90;
+  doc.setFontSize(11);
+  doc.text('Item', 20, y);
+  doc.text('Qty', 120, y);
+  doc.text('Price', 150, y);
+  doc.text('Total', 180, y);
+  y+=7;
+  doc.line(20,y,190,y);
+  y+=7;
+
+  order.items.forEach(item=>{
+    doc.text(item.name.substring(0,30), 20, y);
+    doc.text(item.qty.toString(), 125, y);
+    doc.text('₦'+item.price.toLocaleString(), 150, y);
+    doc.text('₦'+(item.price*item.qty).toLocaleString(), 180, y);
+    y+=7;
+    if(y > 270){ doc.addPage(); y=20; }
+  });
+
+  y+=10;
+  doc.line(20,y,190,y);
+  y+=10;
+  let subtotal = order.total + (order.promo?.value || 0);
+  doc.text(`Subtotal: ₦${subtotal.toLocaleString()}`, 150, y);
+  if(order.promo){
+    y+=7;
+    doc.text(`Discount: -₦${order.promo.value.toLocaleString()}`, 150, y);
+  }
+  y+=7;
+  doc.setFontSize(14);
+  doc.setTextColor(212,175,55);
+  doc.text(`TOTAL: ₦${order.total.toLocaleString()}`, 150, y);
+
+  doc.save(`SosoScent-Invoice-${order.id}.pdf`);
+}
+
+// ========== UPDATED PROFESSIONAL WHATSAPP CHECKOUT ==========
 function checkoutWhatsApp(){
   if(cart.length === 0){alert('Cart is empty!');return;}
 
-  var subtotal = cart.reduce(function(sum,item){return sum + item.price * item.qty}, 0);
-  var discount = 0;
-  if(appliedPromo){
-    discount = appliedPromo.type == 'percent'? subtotal*(appliedPromo.value/100) : appliedPromo.value;
-  }
+  var subtotal = cart.reduce((sum,item)=>sum + item.price * item.qty, 0);
+  var discount = appliedPromo? (appliedPromo.type=='percent'? subtotal*(appliedPromo.value/100) : appliedPromo.value) : 0;
   var total = subtotal - discount;
 
   var orderId = 'SS' + Date.now().toString().slice(-6);
   var orderDate = new Date().toLocaleString('en-NG', {dateStyle:'medium', timeStyle:'short'});
-  var paymentText = selectedPayment=='cod'?'Pay on Delivery':selectedPayment=='transfer'?'Bank Transfer':'Pay with Card';
+  var paymentText = selectedPayment=='cod'?'💵 Pay on Delivery':selectedPayment=='transfer'?'🏦 Bank Transfer':'💳 Card Payment';
 
   var order = {id:orderId,date:orderDate,items:cart,total:total,promo:appliedPromo,payment:paymentText,phone:customerPhone,status:'Processing'};
   orders.unshift(order);
   saveAll();
 
-  var msg = `*✨ ${bizName} Order Receipt ✨*%0A`;
-  msg += '═══════════════%0A';
-  msg += `*Order ID:* ${orderId}%0A`;
-  msg += `*Customer:* ${customerName || 'Guest'}%0A`;
-  msg += `*Phone:* ${customerPhone}%0A`;
-  msg += `*Date:* ${orderDate}%0A`;
-  msg += `*Payment:* ${paymentText}%0A`;
-  msg += '═══════════════%0A%0A';
-  msg += '*ORDER DETAILS*%0A';
+  // Generate PDF invoice #28
+  generateInvoice(order);
 
-  for(var i=0; i<cart.length; i++){
-    var item = cart[i];
-    msg += `➤ ${item.name}%0A`;
-    msg += `Qty: ${item.qty} x ₦${item.price.toLocaleString()}%0A`;
-    msg += `Subtotal: ₦${(item.price * item.qty).toLocaleString()}%0A%0A`;
-  }
+  // Professional WhatsApp message
+  var msg = `✨ *${bizName.toUpperCase()}* ✨%0A`;
+  msg += `━━━━━━━━━━%0A`;
+  msg += `🧾 *ORDER RECEIPT*%0A`;
+  msg += `━━━━━━━━━━%0A`;
+  msg += `📋 Order ID: *${orderId}*%0A`;
+  msg += `👤 Customer: ${customerName || 'Guest'}%0A`;
+  msg += `📱 Phone: ${customerPhone}%0A`;
+  msg += `📅 Date: ${orderDate}%0A`;
+  msg += `💳 Payment: ${paymentText}%0A`;
+  msg += `━━━━━━━━━━%0A%0A`;
+  msg += `*🛍️ ORDER SUMMARY*%0A`;
 
-  msg += '═══════════════%0A';
-  msg += `*Subtotal:* ₦${subtotal.toLocaleString()}%0A`;
+  cart.forEach((item,i)=>{
+    msg += `${i+1}. *${item.name}*%0A`;
+    msg += ` Qty: ${item.qty} × ₦${item.price.toLocaleString()}%0A`;
+    msg += ` Subtotal: ₦${(item.price * item.qty).toLocaleString()}%0A%0A`;
+  });
+
+  msg += `━━━━━━━━━━%0A`;
+  msg += `💰 Subtotal: ₦${subtotal.toLocaleString()}%0A`;
   if(discount > 0){
-    msg += `*Discount:* -₦${discount.toLocaleString()}%0A`;
+    msg += `🎉 Discount: -₦${discount.toLocaleString()}%0A`;
   }
-  msg += `*TOTAL: ₦${total.toLocaleString()}*%0A`;
-  msg += '═══════════════%0A%0A';
-  msg += `_Please confirm my order and delivery details._%0A`;
-  msg += `_Thank you!_`;
+  msg += `*💎 TOTAL: ₦${total.toLocaleString()}*%0A`;
+  msg += `━━━━━━━━━━%0A%0A`;
+  msg += `🚚 *Delivery Details:*%0A`;
+  msg += `We will contact you shortly to confirm delivery address.%0A%0A`;
+  msg += `📄 Invoice PDF has been downloaded to your device.%0A%0A`;
+  msg += `🙏 Thank you for choosing ${bizName}!%0A`;
+  msg += `_Quality you can smell, luxury you can afford._`;
 
-  var finalLink = `https://wa.me/${bizNumber}?text=${encodeURI(msg)}`;
-  window.open(finalLink, '_blank');
+  window.open(`https://wa.me/${bizNumber}?text=${encodeURI(msg)}`, '_blank');
 
   startAbandonedCartTimer();
 
@@ -695,6 +778,25 @@ function shareProduct(id){
   var link=window.location.origin+window.location.pathname+'#product-'+id;
   var msg=`Check out this product: ${product.name} - ₦${product.price.toLocaleString()}%0A${link}`;
   window.open(`https://wa.me/?text=${msg}`,'_blank');
+}
+
+// ========== #19 SHARE WISHLIST TO WHATSAPP ==========
+function shareWishlist(){
+  if(wishlist.length===0){alert('Wishlist is empty!');return;}
+
+  var msg = `💝 *My Soso Scent Wishlist* 💝%0A`;
+  msg += `━━━━━━━━━━%0A%0A`;
+
+  wishlist.forEach((item,i)=>{
+    msg += `${i+1}. *${item.name}*%0A`;
+    msg += ` Price: ₦${item.price.toLocaleString()}%0A%0A`;
+  });
+
+  msg += `━━━━━━━━━━%0A`;
+  msg += `Check these out for me 👀%0A`;
+  msg += `${window.location.origin}`;
+
+  window.open(`https://wa.me/?text=${encodeURI(msg)}`, '_blank');
 }
 
 function showStickyCart(id){
@@ -1070,7 +1172,7 @@ function loadProducts(){
   for(var i=0;i<toShow.length;i++){
     var p=toShow[i];
     var mainImg=(p.images&&p.images.length>0)
-     ? p.images[0]
+    ? p.images[0]
       : 'https://via.placeholder.com/400x400/f5f1e8/d4af37?text=No+Image';
 
     var thumbs='';
