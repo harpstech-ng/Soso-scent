@@ -8,7 +8,7 @@
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<!-- REMOVED firebase-storage - we use Cloudinary now -->
 
 <style>
 :root{
@@ -323,8 +323,8 @@ footer{background:var(--black);color:var(--white);padding:40px 20px;text-align:c
       <option value="1">★ 1 Star</option>
     </select>
     <textarea id="reviewText" placeholder="Write your review..." rows="4"></textarea>
-    <input type="file" id="reviewImage" accept="image/*">
-    <input type="file" id="reviewVideo" accept="video/*">
+    <input type="file" id="reviewImage" accept="image/*" onchange="handleReviewImage(event)">
+    <input type="file" id="reviewVideo" accept="video/*" onchange="handleReviewVideo(event)">
     <div class="upload-preview" id="reviewPreview"></div>
     <button class="btn" style="width:100%" onclick="submitReview()">Submit Review</button>
   </div>
@@ -362,7 +362,7 @@ footer{background:var(--black);color:var(--white);padding:40px 20px;text-align:c
           <option value="3">Strength: Strong</option><option value="4">Strength: Very Strong</option>
           <option value="5">Strength: Extreme</option>
         </select>
-        <input type="file" id="prodImages" accept="image/*" multiple>
+        <input type="file" id="prodImages" accept="image/*" multiple onchange="handleImageUpload(event)">
         <div class="upload-preview" id="uploadPreview"></div>
         <button class="btn" onclick="saveProduct()">Save Product</button>
         <button class="btn-small btn-edit" onclick="clearForm()">Clear Form</button>
@@ -416,7 +416,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-// Removed firebase.storage() - we use Cloudinary now
 
 // ========== DATA ==========
 var products = [];
@@ -508,10 +507,14 @@ async function handleImageUpload(e){
         body: formData
       });
       var data = await res.json();
-      uploadedImages.push(data.secure_url);
-      updateImagePreview();
+      if(data.secure_url){
+        uploadedImages.push(data.secure_url);
+        updateImagePreview();
+      } else {
+        alert('Upload failed: ' + JSON.stringify(data));
+      }
     }catch(err){
-      alert('Upload failed. Try again.');
+      alert('Upload failed. Check console.');
       console.log(err);
     }
   }
@@ -536,12 +539,10 @@ async function handleReviewImage(e){
     document.getElementById('reviewPreview').innerHTML =
       '<div><img src="'+reviewImage+'"><button onclick="removeReviewImage()">x</button></div>';
   }catch(err){
-    alert('Upload failed. Try again.');
+    alert('Upload failed.');
     console.log(err);
   }
 }
-
-// The rest of your code stays the same from here down...
 
 function handleReviewVideo(e){
   var file=e.target.files[0];
@@ -581,9 +582,9 @@ function chatReply(type){
     return: {msg:"7-day return/exchange policy. Item must be unused 🔄"},
     human: {msg:"Connecting you to WhatsApp now..."}
   };
-  
+
   body.innerHTML += `<div class="chat-message" style="background:var(--gold);color:#fff">${responses[type].msg}</div>`;
-  
+
   if(type == 'human'){
     setTimeout(()=>{
       var waLink = `https://wa.me/${bizNumber}?text=${encodeURIComponent('Hello Soso Scent, I need help with my order')}`;
@@ -601,7 +602,7 @@ function checkoutWhatsApp(){
   var subtotal = cart.reduce(function(sum,item){return sum + item.price * item.qty}, 0);
   var discount = 0;
   if(appliedPromo){
-    discount = appliedPromo.type == 'percent' ? subtotal*(appliedPromo.value/100) : appliedPromo.value;
+    discount = appliedPromo.type == 'percent'? subtotal*(appliedPromo.value/100) : appliedPromo.value;
   }
   var total = subtotal - discount;
 
@@ -622,7 +623,7 @@ function checkoutWhatsApp(){
   msg += `*Payment:* ${paymentText}%0A`;
   msg += '═══════════════%0A%0A';
   msg += '*ORDER DETAILS*%0A';
-  
+
   for(var i=0; i<cart.length; i++){
     var item = cart[i];
     msg += `➤ ${item.name}%0A`;
@@ -674,61 +675,6 @@ function updateLoyaltyStatus(){
   if(tier.level!='None'){
     document.getElementById('loyaltyStatus').innerHTML=`<span class="loyalty-badge">${tier.level} Member - ${tier.discount}% OFF</span>`;
   }
-}
-
-async function handleImageUpload(e){
-  var files = e.target.files;
-  if(files.length + uploadedImages.length > 4){
-    alert('Max 4 images per product!');
-    return;
-  }
-  for(var i=0; i<files.length; i++){
-    var file = files[i];
-    var storageRef = storage.ref('products/' + Date.now() + '_' + file.name);
-    var snapshot = await storageRef.put(file);
-    var url = await snapshot.ref.getDownloadURL();
-    uploadedImages.push(url);
-    updateImagePreview();
-  }
-}
-
-async function handleReviewImage(e){
-  var file = e.target.files[0];
-  if(!file) return;
-  var storageRef = storage.ref('reviews/' + Date.now() + '_' + file.name);
-  var snapshot = await storageRef.put(file);
-  reviewImage = await snapshot.ref.getDownloadURL();
-  document.getElementById('reviewPreview').innerHTML =
-    '<div><img src="'+reviewImage+'"><button onclick="removeReviewImage()">x</button></div>';
-}
-
-function handleReviewVideo(e){
-  var file=e.target.files[0];
-  if(!file)return;
-  var reader=new FileReader();
-  reader.onload=function(event){
-    reviewVideo=event.target.result;
-  }
-  reader.readAsDataURL(file);
-}
-
-function removeReviewImage(){
-  reviewImage=null;
-  document.getElementById('reviewPreview').innerHTML='';
-  document.getElementById('reviewImage').value='';
-}
-
-function updateImagePreview(){
-  var html='';
-  for(var i=0;i<uploadedImages.length;i++){
-    html+='<div><img src="'+uploadedImages[i]+'"><button onclick="removeImage('+i+')">x</button></div>';
-  }
-  document.getElementById('uploadPreview').innerHTML=html;
-}
-
-function removeImage(index){
-  uploadedImages.splice(index,1);
-  updateImagePreview();
 }
 
 function toggleMenu(){
@@ -1123,7 +1069,10 @@ function loadProducts(){
   var html='';
   for(var i=0;i<toShow.length;i++){
     var p=toShow[i];
-    var mainImg=p.images&&p.images.length>0?p.images[0]:'https://via.placeholder.com/400x400/f5f1e8/d4af37?text=Product';
+    var mainImg=(p.images&&p.images.length>0)
+     ? p.images[0]
+      : 'https://via.placeholder.com/400x400/f5f1e8/d4af37?text=No+Image';
+
     var thumbs='';
     if(p.images&&p.images.length>1){
       for(var j=0;j<p.images.length;j++){
@@ -1158,7 +1107,7 @@ function loadProducts(){
     html+='<div class="product-card" id="product-'+p.id+'">' +
       '<button class="share-btn" onclick="shareProduct('+p.id+')">📤</button>'+
       '<button class="wishlist-btn '+(isWishlisted?'active':'')+'" onclick="addToWishlist('+p.id+')">❤️</button>'+
-      '<img src="'+mainImg+'" class="product-img" id="mainImg-'+p.id+'">' +
+      '<img src="'+mainImg+'" class="product-img" id="mainImg-'+p.id+'" onerror="this.src=\'https://via.placeholder.com/400x400/f5f1e8/d4af37?text=Error\'">' +
       '<div class="product-thumbs">'+thumbs+'</div>'+
       '<div class="product-info">' +
         '<div style="font-size:1.3rem;font-weight:600;margin-bottom:10px">'+p.name+'</div>' +
