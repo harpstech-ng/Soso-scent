@@ -24,6 +24,7 @@ body{font-family:Georgia,serif;background:var(--beige);color:var(--black)}
 @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-15px)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes slideIn{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
 
 header{
   position:fixed;top:0;width:100%;background:rgba(255,255,255,0.95);
@@ -41,7 +42,7 @@ header{
 .hamburger.active span:nth-child(2){opacity:0}
 .hamburger.active span:nth-child(3){transform:rotate(-45deg) translateY(-8px)}
 .cart-btn{cursor:pointer;font-size:1.5rem;position:relative}
-.cart-count{
+.cart-count,.wishlist-count{
   position:absolute;top:-8px;right:-8px;background:var(--gold);color:#fff;
   border-radius:50%;width:20px;height:20px;font-size:12px;
   display:flex;align-items:center;justify-content:center
@@ -87,7 +88,7 @@ section{padding:100px 20px;min-height:100vh}
 .product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:40px}
 .product-card{
   background:var(--white);border-radius:25px;overflow:hidden;
-  box-shadow:0 15px 35px rgba(0,0,0,0.1);transition:0.5s
+  box-shadow:0 15px 35px rgba(0,0,0,0.1);transition:0.5s;position:relative
 }
 .product-card:hover{transform:translateY(-15px)}
 .product-img{width:100%;height:280px;object-fit:cover;cursor:pointer}
@@ -96,6 +97,15 @@ section{padding:100px 20px;min-height:100vh}
 .product-thumbs img.active{border-color:var(--gold)}
 .product-info{padding:25px}
 .product-price{font-size:1.8rem;color:var(--gold-dark);font-weight:700}
+
+.wishlist-btn{
+  position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);
+  border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;
+  font-size:1.3rem;display:flex;align-items:center;justify-content:center;
+  transition:0.3s
+}
+.wishlist-btn.active{color:var(--red)}
+.wishlist-btn:hover{transform:scale(1.1)}
 
 .review-section{
   margin-top:20px;padding-top:20px;border-top:1px solid var(--beige)
@@ -141,6 +151,18 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
   margin-bottom:15px;text-align:center;font-weight:600
 }
 
+.payment-options{
+  display:flex;flex-direction:column;gap:10px;margin:20px 0
+}
+.payment-option{
+  border:2px solid var(--beige);border-radius:12px;padding:15px;
+  cursor:pointer;transition:0.3s;display:flex;align-items:center;gap:10px
+}
+.payment-option:hover,.payment-option.active{
+  border-color:var(--gold);background:rgba(212,175,55,0.1)
+}
+.payment-option input{width:auto;margin:0}
+
 .chat-widget{
   position:fixed;bottom:30px;right:30px;z-index:999
 }
@@ -162,6 +184,25 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .chat-body{padding:20px}
 .chat-body p{margin-bottom:15px;color:var(--gray)}
 
+.social-proof{
+  position:fixed;bottom:30px;left:30px;background:var(--white);
+  padding:15px 20px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.15);
+  display:none;align-items:center;gap:10px;z-index:999;animation:slideIn 0.5s ease
+}
+.social-proof.show{display:flex}
+.social-proof img{width:40px;height:40px;border-radius:8px;object-fit:cover}
+
+footer{
+  background:var(--black);color:var(--white);padding:40px 20px;text-align:center
+}
+.footer-content{max-width:1200px;margin:0 auto}
+.harps-btn{
+  display:inline-block;margin-top:15px;padding:12px 30px;
+  background:var(--gold);color:var(--black);text-decoration:none;
+  border-radius:50px;font-weight:600;transition:0.3s
+}
+.harps-btn:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(212,175,55,0.4)}
+
 @media(max-width:768px){
 .nav-links{
     position:fixed;top:70px;right:-100%;width:70%;height:100vh;
@@ -172,6 +213,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
 .hamburger{display:flex}
 .hero h1{font-size:2.5rem}
 .chat-widget{bottom:20px;right:20px}
+.social-proof{left:20px;right:20px;bottom:100px}
 </style>
 </head>
 <body>
@@ -184,6 +226,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
     <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
   </ul>
   <div style="display:flex;gap:15px;align-items:center">
+    <div class="cart-btn" onclick="toggleWishlist()">❤️<span class="wishlist-count" id="wishlistCount">0</span></div>
     <div class="cart-btn" onclick="toggleCart()">🛒<span class="cart-count" id="cartCount">0</span></div>
     <div class="hamburger" id="hamburger" onclick="toggleMenu()">
       <span></span><span></span><span></span>
@@ -208,7 +251,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
     </div>
 
     <div id="promoBanner"></div>
-
     <div class="product-grid" id="productGrid"></div>
   </div>
 </section>
@@ -228,6 +270,15 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
   </div>
 </section>
 
+<footer>
+  <div class="footer-content">
+    <p>© 2026 Soso Scent. All Rights Reserved.</p>
+    <a href="https://harpstech-ng.github.io/Harps-Tech-Website/" target="_blank" class="harps-btn">
+      Powered by Harps Tech 🚀
+    </a>
+  </div>
+</footer>
+
 <div class="chat-widget">
   <div class="chat-box" id="chatBox">
     <div class="chat-header">💬 Chat with us</div>
@@ -242,17 +293,50 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
   </div>
 </div>
 
+<div class="social-proof" id="socialProof">
+  <img id="proofImg" src="" alt="">
+  <div>
+    <strong id="proofText">Someone just bought a product</strong><br>
+    <small id="proofTime">2 minutes ago</small>
+  </div>
+</div>
+
 <div class="modal" id="cartModal">
   <div class="modal-content">
     <div class="modal-header"><h2>Your Cart</h2><span class="close-btn" onclick="toggleCart()">&times;</span></div>
     <div id="cartItems"></div>
+
     <div style="margin:20px 0">
       <input type="text" id="promoInput" placeholder="Enter promo code">
       <button class="btn-small btn-success" onclick="applyPromo()">Apply</button>
       <div id="promoMessage" style="margin-top:10px;color:var(--green);font-weight:600"></div>
     </div>
+
+    <h3 style="margin:20px 0 10px">Select Payment Method</h3>
+    <div class="payment-options" id="paymentOptions">
+      <label class="payment-option active">
+        <input type="radio" name="payment" value="cod" checked>
+        <span>💵 Pay on Delivery</span>
+      </label>
+      <label class="payment-option">
+        <input type="radio" name="payment" value="transfer">
+        <span>🏦 Bank Transfer</span>
+      </label>
+      <label class="payment-option">
+        <input type="radio" name="payment" value="card">
+        <span>💳 Pay with Card</span>
+      </label>
+    </div>
+
     <div id="cartTotal" style="font-size:1.8rem;font-weight:700;color:var(--gold-dark);text-align:right;margin:25px 0">Total: ₦0</div>
     <button class="btn" style="width:100%" onclick="checkout()">Checkout on WhatsApp</button>
+  </div>
+</div>
+
+<div class="modal" id="wishlistModal">
+  <div class="modal-content">
+    <div class="modal-header"><h2>Your Wishlist ❤️</h2><span class="close-btn" onclick="toggleWishlist()">&times;</span></div>
+    <div id="wishlistItems"></div>
   </div>
 </div>
 
@@ -350,6 +434,7 @@ var products = JSON.parse(localStorage.getItem('sosoProducts')) || [
   {id:1,name:"Mystical ASAD Perfume 30ml",price:3000,desc:"Long lasting luxury scent",images:[],reviews:[]}
 ];
 var cart = JSON.parse(localStorage.getItem('sosoCart')) || [];
+var wishlist = JSON.parse(localStorage.getItem('sosoWishlist')) || [];
 var orders = JSON.parse(localStorage.getItem('sosoOrders')) || [];
 var promos = JSON.parse(localStorage.getItem('sosoPromos')) || [];
 var reviews = JSON.parse(localStorage.getItem('sosoReviews')) || [];
@@ -362,9 +447,18 @@ var uploadedImages = [];
 var reviewImage = null;
 var appliedPromo = null;
 var filteredProducts = products;
+var selectedPayment = 'cod';
 
 document.getElementById('prodImages').addEventListener('change',handleImageUpload);
 document.getElementById('reviewImage').addEventListener('change',handleReviewImage);
+
+document.querySelectorAll('input[name="payment"]').forEach(radio=>{
+  radio.addEventListener('change',e=>{
+    selectedPayment=e.target.value;
+    document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('active'));
+    e.target.closest('.payment-option').classList.add('active');
+  });
+});
 
 function handleImageUpload(e){
   var files=e.target.files;
@@ -427,6 +521,47 @@ function toggleChat(){
 
 function openWhatsAppChat(){
   window.location.href='https://wa.me/'+bizNumber+'?text=Hi! I need help with Soso Scent products.';
+}
+
+function toggleWishlist(){
+  document.getElementById('wishlistModal').classList.toggle('active');
+  loadWishlist();
+}
+
+function addToWishlist(id){
+  var product=products.find(p=>p.id==id);
+  var exists=wishlist.find(w=>w.id==id);
+  if(exists){
+    wishlist=wishlist.filter(w=>w.id!=id);
+  }else{
+    wishlist.push(product);
+  }
+  localStorage.setItem('sosoWishlist',JSON.stringify(wishlist));
+  updateWishlistCount();
+  loadProducts();
+}
+
+function loadWishlist(){
+  updateWishlistCount();
+  var html='';
+  if(wishlist.length===0){
+    html='<p style="text-align:center;color:var(--gray)">Your wishlist is empty</p>';
+  }else{
+    wishlist.forEach(p=>{
+      var img=p.images&&p.images.length>0?p.images[0]:'https://via.placeholder.com/400x400/f5f1e8/d4af37?text=Product';
+      html+=`<div class="admin-item">
+        <img src="${img}">
+        <div style="flex:1"><strong>${p.name}</strong><br>₦${p.price.toLocaleString()}</div>
+        <button class="btn-small btn-edit" onclick="addToCart(${p.id});toggleWishlist()">Add to Cart</button>
+        <button class="btn-small btn-delete" onclick="addToWishlist(${p.id})">Remove</button>
+      </div>`;
+    });
+  }
+  document.getElementById('wishlistItems').innerHTML=html;
+}
+
+function updateWishlistCount(){
+  document.getElementById('wishlistCount').textContent=wishlist.length;
 }
 
 document.getElementById('logo').addEventListener('click',function(){
@@ -693,6 +828,7 @@ function loadOrders(){
         '<strong>Order #'+o.id+'</strong><br>' +
         '<small>'+o.date+'</small><br>' +
         '<p>Total: ₦'+o.total.toLocaleString()+'</p>' +
+        '<small>Payment: '+o.payment+'</small>' +
       '</div>';
     }
   }
@@ -719,6 +855,7 @@ function loadProducts(){
       }
     }
 
+    var isWishlisted = wishlist.find(w=>w.id==p.id);
     var productReviews=reviews.filter(r=>r.productId==p.id);
     var reviewHtml='';
     if(productReviews.length>0){
@@ -739,6 +876,7 @@ function loadProducts(){
     }
 
     html += '<div class="product-card">' +
+      '<button class="wishlist-btn '+(isWishlisted?'active':'')+'" onclick="addToWishlist('+p.id+')">❤️</button>'+
       '<img src="'+mainImg+'" class="product-img" id="mainImg-'+i+'">' +
       '<div class="product-thumbs">'+thumbs+'</div>'+
       '<div class="product-info">' +
@@ -840,7 +978,9 @@ function checkout(){
 
   var orderId = 'SS' + Date.now().toString().slice(-6);
   var orderDate = new Date().toLocaleString('en-NG', {dateStyle:'medium', timeStyle:'short'});
-  var order={id:orderId,date:orderDate,items:cart,total:total,promo:appliedPromo};
+  var paymentText = selectedPayment=='cod'?'Pay on Delivery':selectedPayment=='transfer'?'Bank Transfer':'Pay with Card';
+
+  var order={id:orderId,date:orderDate,items:cart,total:total,promo:appliedPromo,payment:paymentText};
   orders.unshift(order);
   localStorage.setItem('sosoOrders',JSON.stringify(orders));
 
@@ -848,6 +988,7 @@ function checkout(){
   msg += '═══════════════%0A';
   msg += '*Order ID:* ' + orderId + '%0A';
   msg += '*Date:* ' + orderDate + '%0A';
+  msg += '*Payment:* ' + paymentText + '%0A';
   msg += '═══════════════%0A%0A';
 
   msg += '*ORDER DETAILS*%0A';
@@ -880,7 +1021,7 @@ function checkout(){
   window.location.href = 'https://wa.me/'+bizNumber+'?text=' + msg;
 
   setTimeout(function(){
-    cart=[];appliedPromo=null;updateCart();toggleCart();loadOrders();
+    cart=[];appliedPromo=null;selectedPayment='cod';updateCart();toggleCart();loadOrders();
   }, 1000);
 }
 
@@ -899,11 +1040,30 @@ function typeWriter(){
   type();
 }
 
+// Social proof popup
+var proofMessages = [
+  {name:"Ada", city:"Lagos", product:"Mystical ASAD", img:"https://via.placeholder.com/40"},
+  {name:"Emeka", city:"Abuja", product:"Oud Royal", img:"https://via.placeholder.com/40"},
+  {name:"Blessing", city:"PH", product:"Vanilla Dream", img:"https://via.placeholder.com/40"},
+  {name:"Chinonso", city:"Enugu", product:"Citrus Blast", img:"https://via.placeholder.com/40"}
+];
+
+function showSocialProof(){
+  var proof = proofMessages[Math.floor(Math.random()*proofMessages.length)];
+  document.getElementById('proofImg').src=proof.img;
+  document.getElementById('proofText').textContent=proof.name+" from "+proof.city+" just bought "+proof.product;
+  document.getElementById('proofTime').textContent=Math.floor(Math.random()*10+1)+" minutes ago";
+  document.getElementById('socialProof').classList.add('show');
+  setTimeout(()=>document.getElementById('socialProof').classList.remove('show'),4000);
+}
+
 window.onload = function(){
   loadProducts();
   updateCart();
+  updateWishlistCount();
   showPromoBanner();
   typeWriter();
+  setInterval(showSocialProof,8000);
 };
 </script>
 
